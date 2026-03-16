@@ -421,8 +421,8 @@
 
     <!-- Cheese wedge icon (visible when closed) -->
     <svg id="cheese-icon" viewBox="0 0 80 80" aria-hidden="true">
-      <circle cx="40" cy="40" r="38" fill="#efc74d"/>
-      <path d="M40,40 L78.3,55.2 A1,1 0 0 1 55.2,78.3 Z" fill="#31383c"/>
+      <!-- cheese circle with wedge cut out: center → point on circle → large arc → back to center -->
+      <path fill="#efc74d" d="M40,40 L75.1,54.5 A38,38 0 1 0 54.5,75.1 Z"/>
     </svg>
 
     <!-- Chat panel (morphs from circle to panel) -->
@@ -527,7 +527,8 @@
   <script type="module" src="js/index.js"></script>
   <script>
     // Local dev → localhost:8000. Deployed → replace with your Render URL.
-    const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    const _h = window.location.hostname;
+    const API_URL = (_h === 'localhost' || _h === '127.0.0.1' || _h === '' || window.location.protocol === 'file:')
       ? "http://localhost:8000/chat"
       : "https://YOUR-RENDER-APP-NAME.onrender.com/chat";
 

@@ -19,7 +19,7 @@ EMBEDDING_MODEL = os.environ.get("EMBEDDING_MODEL", "text-embedding-3-small")
 # Comma-separated list of allowed origins, e.g.:
 #   ALLOWED_ORIGINS=https://yourname.github.io,http://localhost:5500
 # Defaults to localhost only so production must set this env var explicitly.
-_raw_origins = os.environ.get("ALLOWED_ORIGINS", "http://localhost:8000,http://127.0.0.1:8000")
+_raw_origins = os.environ.get("ALLOWED_ORIGINS", "http://localhost:8000,http://127.0.0.1:8000,http://localhost:5500,http://127.0.0.1:5500,null")
 ALLOWED_ORIGINS = [o.strip() for o in _raw_origins.split(",") if o.strip()]
 
 openai_client = OpenAI(api_key=OPENAI_API_KEY)
