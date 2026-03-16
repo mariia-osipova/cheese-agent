@@ -22,7 +22,7 @@ CHEESE_TERMS: List[str] = [
     "сыр", "сырный", "cheddar cheese", "gouda", "parmesan",
 ]
 
-SAVE_DIR = Path("../cheese-frontend/src/cheese")
+SAVE_DIR = Path("../docs/src/cheese")
 SAVE_DIR.mkdir(exist_ok=True)
 
 def google_image_search(query: str, start: int = 1, num: int = 10):

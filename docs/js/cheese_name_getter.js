@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 
-// go from /cheese-frontend/js → ../../cheese-backend/cheese
+// go from /docs/js → ../../cheese-backend/cheese
 const dir = path.join(__dirname, '../../cheese-backend/cheese');
 
 // find all image files and build relative browser-friendly paths

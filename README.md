@@ -44,7 +44,7 @@ Chat with the Cheese Master — a knowledgeable AI that answers questions about 
 
 ```
 langflow_cheese/
-├── cheese-frontend/          # Static site (deployed to GitHub Pages)
+├── docs/                     # Static site (deployed to GitHub Pages)
 │   ├── index.html            # All UI, slash commands, quiz, selfie, cheddar
 │   ├── css/style.css
 │   ├── js/
@@ -105,10 +105,10 @@ uvicorn api:app --reload
 
 ### 3. Run the frontend
 
-The frontend is plain HTML — no build step needed. Open `cheese-frontend/index.html` directly in a browser, or serve it with any static server:
+The frontend is plain HTML — no build step needed. Open `docs/index.html` directly in a browser, or serve it with any static server:
 
 ```bash
-cd cheese-frontend
+cd docs
 python -m http.server 5500
 # open http://localhost:5500
 ```
@@ -158,13 +158,13 @@ Copy `.env.example` to `.env` and fill in:
 
 ### Frontend — GitHub Pages
 
-1. In `cheese-frontend/index.html`, update the production API URL:
+1. In `docs/index.html`, update the production API URL:
    ```js
    : "https://your-render-service.onrender.com/chat";
    ```
 2. Push to `main`
 3. In your GitHub repo: **Settings → Pages → Source → GitHub Actions**
-4. The workflow in `.github/workflows/deploy-frontend.yml` deploys automatically on every push
+4. The workflow in `.github/workflows/deploy-frontend.yml` deploys automatically on every push to `main` that touches `docs/`
 
 ---
 
