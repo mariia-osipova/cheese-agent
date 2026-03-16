@@ -9,596 +9,472 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <title>Cheese Master</title>
   <style>
+    /* ── Tokens ───────────────────────────────────────────────────────── */
     :root {
-      --cream:        oklch(97%   0.012  82);
-      --cream-mid:    oklch(94%   0.018  80);
-      --cream-deep:   oklch(90%   0.025  78);
-      --gold:         oklch(73%   0.130  78);
-      --gold-dark:    oklch(50%   0.115  66);
-      --gold-light:   oklch(87%   0.065  80);
-      --gold-ring:    oklch(73%   0.130  78 / 0.18);
-      --brown:        oklch(21%   0.040  66);
-      --brown-mid:    oklch(40%   0.065  68);
-      --brown-light:  oklch(60%   0.050  70);
-      --shadow-warm:  oklch(20%   0.060  66 / 0.42);
-      --shadow-soft:  oklch(20%   0.050  70 / 0.10);
-      --correct:      oklch(62%   0.155 148);
-      --correct-bg:   oklch(94%   0.060 148);
-      --wrong:        oklch(58%   0.175  25);
-      --wrong-bg:     oklch(94%   0.040  25);
+      --gold:         #efc74d;
+      --dark:         #31383c;
+      --glass:        rgba(255,255,255,0.45);
+      --glass-strong: rgba(255,255,255,0.78);
+      --glass-input:  rgba(255,255,255,0.65);
+      --correct:      #52b472;
+      --correct-bg:   #eaf5ee;
+      --wrong:        #d95858;
+      --wrong-bg:     #faeaea;
+      --w-open:       460px;
+      --h-open:       600px;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     [hidden] { display: none !important; }
-
-    html, body {
-      width: 100%; height: 100%;
-      overflow: hidden;
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-    }
-
-    body {
-      font-family: 'Outfit', system-ui, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 28px;
-    }
-
-    body::before {
-      content: '';
-      position: fixed; inset: 0;
-      background:
-        radial-gradient(ellipse 120% 100% at 50% 100%, oklch(20% 0.06 68 / 0.55) 0%, transparent 65%),
-        oklch(20% 0.05 68 / 0.18);
-      pointer-events: none;
-      z-index: 0;
-    }
-
     .visually-hidden {
       position: absolute; width: 1px; height: 1px; padding: 0;
-      margin: -1px; overflow: hidden; clip: rect(0,0,0,0);
-      white-space: nowrap; border: 0;
+      margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
     }
 
-    /* ─────────────── Chat Panel ─────────────── */
-    #chat-container {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      max-width: 640px;
-      height: min(840px, calc(100vh - 56px));
-      display: flex;
-      flex-direction: column;
-      background: var(--cream);
-      border-radius: 28px;
-      box-shadow:
-        0 0 0 1px oklch(73% 0.13 78 / 0.22),
-        0 2px 4px oklch(20% 0.06 68 / 0.08),
-        0 24px 64px var(--shadow-warm),
-        0 64px 120px oklch(20% 0.06 68 / 0.25);
-      overflow: hidden;
+    /* ── Background ───────────────────────────────────────────────────── */
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      background: var(--dark);
+      background-size: cover; background-position: center; background-repeat: no-repeat;
     }
-
-    /* ─────────────── Header ─────────────── */
-    #chat-header {
-      flex-shrink: 0;
-      padding: 30px 36px 24px;
-      text-align: center;
-      background: var(--cream);
-      border-bottom: 1px solid var(--gold-light);
-      user-select: none;
-    }
-
-    .header-eyebrow {
-      font-size: 0.62rem; font-weight: 500;
-      letter-spacing: 0.26em; text-transform: uppercase;
-      color: var(--gold-dark); margin-bottom: 12px; opacity: 0.85;
-    }
-
-    .header-title {
-      font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: clamp(2rem, 5.5vw, 3rem);
-      font-weight: 300; line-height: 1;
-      color: var(--brown); letter-spacing: 0.015em;
-    }
-
-    .header-title em { font-style: italic; font-weight: 400; color: var(--gold-dark); }
-
-    .header-ornament {
+    body {
+      font-family: 'Outfit', system-ui, sans-serif;
       display: flex; align-items: center; justify-content: center;
-      gap: 14px; margin-top: 18px;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background: rgba(49,56,60,0.72);
+      pointer-events: none; z-index: 0;
     }
 
-    .header-ornament::before, .header-ornament::after {
-      content: ''; display: block; height: 1px; width: 56px;
-      background: linear-gradient(to right, transparent, var(--gold), transparent);
+    /* ── Widget wrapper ───────────────────────────────────────────────── */
+    #widget-wrapper {
+      position: relative; z-index: 1;
+      width: 80px; height: 80px;
+      cursor: pointer;
+    }
+    #widget-wrapper.is-open {
+      width: var(--w-open); height: var(--h-open);
+      cursor: default;
     }
 
-    .ornament-gem {
-      width: 5px; height: 5px; background: var(--gold);
-      transform: rotate(45deg); opacity: 0.75;
+    /* ── Cheese icon ──────────────────────────────────────────────────── */
+    #cheese-icon {
+      position: absolute; top: 0; left: 0;
+      width: 80px; height: 80px; pointer-events: none;
+      opacity: 1; transform: scale(1);
+      transition: opacity 0.3s ease 0.2s, transform 0.3s cubic-bezier(0.34,1.5,0.64,1) 0.2s;
+    }
+    #widget-wrapper.is-open #cheese-icon {
+      opacity: 0; transform: scale(0.7);
+      transition: opacity 0.2s ease, transform 0.2s ease;
     }
 
-    /* ─────────────── Messages ─────────────── */
-    #chat-messages {
-      flex: 1; overflow-y: auto;
-      padding: 28px 32px;
-      display: flex; flex-direction: column; gap: 22px;
-      scroll-behavior: smooth;
+    /* ── Chat panel ───────────────────────────────────────────────────── */
+    #chat-panel {
+      position: absolute; inset: 0;
+      background: var(--gold);
+      border-radius: 50%;
+      overflow: hidden;
+      opacity: 0;
+      display: flex; flex-direction: column;
+      transition: border-radius 0.4s ease, opacity 0.25s ease 0.15s, box-shadow 0.3s ease;
+    }
+    #widget-wrapper.is-open #chat-panel {
+      border-radius: 32px;
+      opacity: 1;
+      padding: 20px;
+      gap: 14px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.45);
+      transition: border-radius 0.55s cubic-bezier(0.22,1.4,0.36,1), opacity 0.25s ease, box-shadow 0.4s ease;
     }
 
-    #chat-messages::-webkit-scrollbar { width: 3px; }
-    #chat-messages::-webkit-scrollbar-track { background: transparent; }
-    #chat-messages::-webkit-scrollbar-thumb { background: var(--gold-light); border-radius: 2px; }
-
-    .msg-wrapper { display: flex; flex-direction: column; animation: msg-rise 0.38s cubic-bezier(0.16, 1, 0.3, 1) both; }
-    .msg-wrapper.user { align-items: flex-end; }
-    .msg-wrapper.bot  { align-items: flex-start; }
-
-    @keyframes msg-rise {
-      from { opacity: 0; transform: translateY(16px); }
+    /* ── Keyframes ────────────────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-
-    .msg-sender {
-      font-size: 0.62rem; font-weight: 500; letter-spacing: 0.14em;
-      text-transform: uppercase; color: var(--brown-light);
-      margin-bottom: 7px; padding: 0 5px;
+    @keyframes msg-rise {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
-
-    .msg {
-      max-width: 78%; padding: 13px 20px; border-radius: 20px;
-      font-size: 0.94rem; line-height: 1.65; word-break: break-word;
-    }
-
-    .msg.user { background: var(--gold); color: var(--brown); border-bottom-right-radius: 5px; }
-
-    .msg.user.is-command {
-      background: var(--gold-dark); color: var(--cream);
-      font-size: 0.86rem; padding: 9px 16px;
-    }
-
-    .msg.bot { background: white; color: var(--brown); border-bottom-left-radius: 5px; box-shadow: 0 2px 14px var(--shadow-soft); }
-    .msg.error { background: oklch(94% 0.025 30); color: oklch(38% 0.08 30); border-bottom-left-radius: 5px; font-size: 0.88rem; }
-
-    .msg.typing {
-      color: var(--brown-light); font-style: italic;
-      display: flex; align-items: center; gap: 8px; padding: 14px 20px;
-    }
-
-    .typing-dots { display: inline-flex; gap: 5px; align-items: center; flex-shrink: 0; }
-    .typing-dots span {
-      display: block; width: 5px; height: 5px; border-radius: 50%;
-      background: var(--brown-light); animation: dot-bob 1.3s ease-in-out infinite;
-    }
-    .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
-    .typing-dots span:nth-child(3) { animation-delay: 0.30s; }
-
     @keyframes dot-bob {
-      0%, 55%, 100% { opacity: 0.22; transform: translateY(0); }
-      28%            { opacity: 1;    transform: translateY(-4px); }
+      0%, 55%, 100% { opacity: 0.25; transform: translateY(0); }
+      28%            { opacity: 1;   transform: translateY(-3px); }
     }
-
-    /* ─────────────── Command Palette ─────────────── */
-    #palette-wrapper {
-      flex-shrink: 0;
-      display: grid;
-      grid-template-rows: 0fr;
-      transition: grid-template-rows 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    @keyframes countdown-pop {
+      from { opacity: 0; transform: scale(1.6); }
+      to   { opacity: 1; transform: scale(1); }
     }
-
-    #palette-wrapper.open { grid-template-rows: 1fr; }
-
-    #command-palette { min-height: 0; overflow: hidden; }
-
-    .palette-inner {
-      background: var(--cream-mid);
-      border-top: 1px solid var(--gold-light);
-      border-bottom: 1px solid var(--gold-light);
-    }
-
-    .palette-label {
-      padding: 10px 22px 5px;
-      font-size: 0.57rem; font-weight: 500; letter-spacing: 0.24em;
-      text-transform: uppercase; color: var(--brown-light);
-    }
-
-    .palette-list { list-style: none; padding: 2px 10px 8px; }
-
-    .command-item {
-      width: 100%; display: flex; align-items: center; gap: 13px;
-      padding: 8px 12px; background: none; border: none; border-radius: 12px;
-      cursor: pointer; text-align: left; font-family: 'Outfit', system-ui, sans-serif;
-      transition: background 0.1s ease;
-    }
-    .command-item:hover, .command-item.active { background: oklch(73% 0.130 78 / 0.14); }
-
-    .cmd-icon {
-      width: 32px; height: 32px; flex-shrink: 0; border-radius: 9px;
-      background: white; display: flex; align-items: center; justify-content: center;
-      font-size: 0.95rem; box-shadow: 0 1px 4px var(--shadow-soft);
-    }
-
-    .cmd-body { flex: 1; min-width: 0; }
-    .cmd-name { display: block; font-size: 0.875rem; font-weight: 500; color: var(--brown); line-height: 1.25; }
-    .cmd-desc { display: block; font-size: 0.76rem; color: var(--brown-light); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-    .cmd-arg-hint {
-      font-size: 0.68rem; color: var(--gold-dark);
-      background: oklch(87% 0.065 80 / 0.6);
-      padding: 2px 8px; border-radius: 5px; font-style: italic;
-      flex-shrink: 0; white-space: nowrap;
-    }
-
-    .palette-empty { padding: 14px 22px; font-size: 0.82rem; color: var(--brown-light); font-style: italic; }
-
-    /* ─────────────── Input Row ─────────────── */
-    #chat-input-row {
-      flex-shrink: 0; display: flex; gap: 10px; align-items: center;
-      padding: 16px 24px 22px;
-      background: var(--cream-mid); border-top: 1px solid var(--gold-light);
-    }
-
-    #chat-input {
-      flex: 1; padding: 13px 20px; font-size: 0.93rem;
-      font-family: 'Outfit', system-ui, sans-serif;
-      border: 1.5px solid var(--gold-light); border-radius: 16px;
-      background: white; color: var(--brown); outline: none; min-height: 50px;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease;
-    }
-    #chat-input::placeholder { color: var(--brown-light); font-style: italic; opacity: 0.75; }
-    #chat-input:focus { border-color: var(--gold-dark); box-shadow: 0 0 0 3px var(--gold-ring); }
-    #chat-input.slash-mode { border-color: var(--gold-dark); background: oklch(97% 0.018 80); }
-
-    #send-btn {
-      width: 50px; height: 50px; flex-shrink: 0; border-radius: 16px; border: none;
-      background: var(--gold-dark); color: var(--cream); cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.15s ease, transform 0.1s ease;
-    }
-    #send-btn:hover  { background: var(--brown-mid); }
-    #send-btn:active { background: var(--brown); transform: scale(0.91); }
-    #send-btn:focus-visible { outline: 3px solid var(--gold-dark); outline-offset: 2px; }
-    #send-btn:disabled { opacity: 0.38; cursor: not-allowed; transform: none; }
-    #send-btn svg { width: 17px; height: 17px; display: block; }
-
-    /* ─────────────── Modal Base ─────────────── */
-    .modal-overlay {
-      position: fixed; inset: 0; z-index: 1000;
-      display: flex; align-items: center; justify-content: center;
-      padding: 24px;
-    }
-
-    .modal-overlay[hidden] { display: none; }
-
-    .modal-backdrop {
-      position: absolute; inset: 0;
-      background: oklch(15% 0.04 68 / 0.72);
-      backdrop-filter: blur(4px);
-    }
-
-    .modal-panel {
-      position: relative; z-index: 1;
-      background: var(--cream);
-      border-radius: 28px;
-      box-shadow:
-        0 0 0 1px oklch(73% 0.13 78 / 0.2),
-        0 32px 80px oklch(15% 0.06 68 / 0.5);
-      overflow: hidden;
-      animation: modal-in 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
-      width: 100%;
-    }
-
     @keyframes modal-in {
       from { opacity: 0; transform: scale(0.92) translateY(16px); }
       to   { opacity: 1; transform: scale(1) translateY(0); }
     }
 
+    /* ── Header ───────────────────────────────────────────────────────── */
+    #chat-header {
+      flex-shrink: 0;
+      display: flex; align-items: center; gap: 12px;
+      opacity: 0;
+    }
+    #widget-wrapper.is-open #chat-header { animation: fadeUp 0.4s ease 0.3s both; }
+
+    .header-pill {
+      height: 36px; padding: 0 12px;
+      background: var(--dark); border-radius: 999px;
+      display: flex; align-items: center; gap: 2px;
+      font-size: 18px; white-space: nowrap; flex-shrink: 0;
+    }
+    .header-text { display: flex; flex-direction: column; }
+    .header-eyebrow {
+      font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--dark); opacity: 0.55; margin-bottom: 2px;
+    }
+    .header-title {
+      font-size: 18px; font-weight: 600; color: var(--dark); line-height: 1;
+    }
+
+    /* ── Messages ─────────────────────────────────────────────────────── */
+    #chat-messages {
+      flex: 1; min-height: 0; overflow-y: auto;
+      background: var(--glass);
+      border-radius: 16px;
+      padding: 14px;
+      display: flex; flex-direction: column; gap: 10px;
+      scroll-behavior: smooth;
+      opacity: 0;
+    }
+    #widget-wrapper.is-open #chat-messages { animation: fadeUp 0.4s ease 0.38s both; }
+
+    #chat-messages::-webkit-scrollbar { width: 3px; }
+    #chat-messages::-webkit-scrollbar-track { background: transparent; }
+    #chat-messages::-webkit-scrollbar-thumb { background: rgba(49,56,60,0.25); border-radius: 2px; }
+
+    .msg-wrapper { display: flex; flex-direction: column; animation: msg-rise 0.35s cubic-bezier(0.16,1,0.3,1) both; }
+    .msg-wrapper.user { align-items: flex-end; }
+    .msg-wrapper.bot  { align-items: flex-start; }
+
+    .msg-sender {
+      font-size: 0.6rem; font-weight: 500; letter-spacing: 0.12em;
+      text-transform: uppercase; color: rgba(49,56,60,0.45);
+      margin-bottom: 5px; padding: 0 4px;
+    }
+    .msg {
+      max-width: 84%; padding: 10px 14px; border-radius: 17px;
+      font-size: 0.88rem; line-height: 1.6; word-break: break-word;
+    }
+    .msg.user { background: var(--dark); color: var(--gold); border-bottom-right-radius: 4px; }
+    .msg.user.is-command { background: rgba(49,56,60,0.75); color: var(--gold); font-size: 0.82rem; padding: 8px 13px; }
+    .msg.bot  { background: var(--glass-strong); color: var(--dark); border-bottom-left-radius: 4px; }
+    .msg.error { background: rgba(217,88,88,0.18); color: #b83030; font-size: 0.85rem; border-bottom-left-radius: 4px; }
+    .msg.typing {
+      color: rgba(49,56,60,0.55); font-style: italic;
+      display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+    }
+    .typing-dots { display: inline-flex; gap: 4px; align-items: center; flex-shrink: 0; }
+    .typing-dots span {
+      display: block; width: 4px; height: 4px; border-radius: 50%;
+      background: rgba(49,56,60,0.45); animation: dot-bob 1.3s ease-in-out infinite;
+    }
+    .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.30s; }
+
+    /* ── Command palette ──────────────────────────────────────────────── */
+    #palette-wrapper {
+      flex-shrink: 0;
+      display: grid; grid-template-rows: 0fr;
+      transition: grid-template-rows 0.16s cubic-bezier(0.16,1,0.3,1);
+    }
+    #palette-wrapper.open { grid-template-rows: 1fr; }
+    #command-palette { min-height: 0; overflow: hidden; }
+
+    .palette-inner {
+      background: rgba(49,56,60,0.07);
+      border-radius: 12px; margin-bottom: 2px;
+    }
+    .palette-label {
+      padding: 8px 14px 3px;
+      font-size: 0.55rem; font-weight: 500; letter-spacing: 0.22em;
+      text-transform: uppercase; color: rgba(49,56,60,0.45);
+    }
+    .palette-list { list-style: none; padding: 2px 8px 6px; max-height: 192px; overflow-y: auto; }
+    .palette-list::-webkit-scrollbar { width: 3px; }
+    .palette-list::-webkit-scrollbar-track { background: transparent; }
+    .palette-list::-webkit-scrollbar-thumb { background: rgba(49,56,60,0.2); border-radius: 2px; }
+
+    .command-item {
+      width: 100%; display: flex; align-items: center; gap: 10px;
+      padding: 7px 10px; background: none; border: none; border-radius: 10px;
+      cursor: pointer; text-align: left; font-family: 'Outfit', system-ui, sans-serif;
+      transition: background 0.1s ease;
+    }
+    .command-item:hover, .command-item.active { background: rgba(49,56,60,0.1); }
+
+    .cmd-icon {
+      width: 28px; height: 28px; flex-shrink: 0; border-radius: 8px;
+      background: rgba(255,255,255,0.65);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem;
+    }
+    .cmd-body { flex: 1; min-width: 0; }
+    .cmd-name { display: block; font-size: 0.82rem; font-weight: 500; color: var(--dark); line-height: 1.2; }
+    .cmd-desc { display: block; font-size: 0.71rem; color: rgba(49,56,60,0.55); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cmd-arg-hint {
+      font-size: 0.65rem; color: rgba(49,56,60,0.55);
+      background: rgba(49,56,60,0.1);
+      padding: 2px 7px; border-radius: 4px; font-style: italic;
+      flex-shrink: 0; white-space: nowrap;
+    }
+    .palette-empty { padding: 10px 14px; font-size: 0.8rem; color: rgba(49,56,60,0.5); font-style: italic; }
+
+    /* ── Input row ────────────────────────────────────────────────────── */
+    #chat-input-row {
+      flex-shrink: 0;
+      display: flex; gap: 8px; align-items: center;
+      opacity: 0;
+    }
+    #widget-wrapper.is-open #chat-input-row { animation: fadeUp 0.4s ease 0.45s both; }
+
+    #chat-input {
+      flex: 1; padding: 10px 16px;
+      font-size: 0.87rem; font-family: 'Outfit', system-ui, sans-serif;
+      border: none; border-radius: 20px; outline: none;
+      background: var(--glass-input); color: var(--dark);
+      transition: background 0.15s ease;
+    }
+    #chat-input::placeholder { color: rgba(49,56,60,0.5); font-style: italic; }
+    #chat-input:focus   { background: rgba(255,255,255,0.82); }
+    #chat-input.slash-mode { background: rgba(255,255,255,0.82); }
+
+    #send-btn {
+      width: 40px; height: 40px; min-width: 40px; flex-shrink: 0;
+      border-radius: 50%; border: none;
+      background: var(--dark); color: var(--gold);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.2s cubic-bezier(0.34,1.5,0.64,1);
+    }
+    #send-btn:hover  { transform: scale(1.15); }
+    #send-btn:active { transform: scale(0.9); }
+    #send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    #send-btn svg { width: 16px; height: 16px; display: block; }
+
+    /* ── Modal base ───────────────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      display: flex; align-items: center; justify-content: center; padding: 24px;
+    }
+    .modal-overlay[hidden] { display: none; }
+    .modal-backdrop {
+      position: absolute; inset: 0;
+      background: rgba(20,24,26,0.72);
+      backdrop-filter: blur(4px);
+    }
+    .modal-panel {
+      position: relative; z-index: 1;
+      background: var(--gold);
+      border-radius: 28px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.45);
+      overflow: hidden;
+      animation: modal-in 0.32s cubic-bezier(0.16,1,0.3,1) both;
+      width: 100%;
+    }
     .modal-header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 24px 28px 20px;
-      border-bottom: 1px solid var(--gold-light);
-      background: var(--cream);
+      padding: 22px 26px 18px;
+      border-bottom: 1px solid rgba(49,56,60,0.12);
     }
-
     .modal-eyebrow {
       font-size: 0.62rem; font-weight: 500; letter-spacing: 0.24em;
-      text-transform: uppercase; color: var(--gold-dark);
+      text-transform: uppercase; color: rgba(49,56,60,0.55);
     }
-
     .modal-close {
-      width: 32px; height: 32px; border-radius: 10px; border: none;
-      background: var(--cream-mid); color: var(--brown-mid);
+      width: 30px; height: 30px; border-radius: 9px; border: none;
+      background: rgba(49,56,60,0.1); color: rgba(49,56,60,0.6);
       display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: background 0.1s ease, color 0.1s ease;
-      font-size: 1.1rem; line-height: 1;
+      cursor: pointer; font-size: 1rem; line-height: 1;
+      transition: background 0.1s ease, color 0.1s ease;
     }
-    .modal-close:hover { background: var(--cream-deep); color: var(--brown); }
-    .modal-close:focus-visible { outline: 3px solid var(--gold-dark); outline-offset: 2px; }
+    .modal-close:hover { background: rgba(49,56,60,0.18); color: var(--dark); }
 
-    /* ─────────────── Quiz Modal ─────────────── */
+    /* ── Quiz modal ───────────────────────────────────────────────────── */
     .quiz-panel { max-width: 500px; }
-
-    .quiz-progress {
-      height: 3px; background: var(--gold-light);
-    }
-
-    .quiz-progress-bar {
-      height: 100%; background: var(--gold-dark);
-      transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      width: 0%;
-    }
-
-    .quiz-body { padding: 28px 28px 20px; }
-
-    .quiz-counter {
-      font-size: 0.68rem; font-weight: 500; letter-spacing: 0.16em;
-      text-transform: uppercase; color: var(--brown-light); margin-bottom: 14px;
-    }
-
+    .quiz-progress { height: 3px; background: rgba(49,56,60,0.15); }
+    .quiz-progress-bar { height: 100%; background: var(--dark); transition: width 0.4s cubic-bezier(0.16,1,0.3,1); width: 0%; }
+    .quiz-body { padding: 26px 26px 18px; }
+    .quiz-counter { font-size: 0.67rem; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(49,56,60,0.5); margin-bottom: 12px; }
     .quiz-question {
       font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: clamp(1.25rem, 3vw, 1.6rem);
-      font-weight: 400; line-height: 1.35; color: var(--brown);
-      margin-bottom: 24px;
+      font-size: clamp(1.2rem, 3vw, 1.55rem); font-weight: 400; line-height: 1.35;
+      color: var(--dark); margin-bottom: 22px;
     }
-
-    .quiz-options { display: flex; flex-direction: column; gap: 10px; }
-
+    .quiz-options { display: flex; flex-direction: column; gap: 9px; }
     .quiz-option {
-      display: flex; align-items: center; gap: 14px;
-      padding: 13px 18px; border-radius: 14px;
-      border: 1.5px solid var(--gold-light);
-      background: white; cursor: pointer; text-align: left;
+      display: flex; align-items: center; gap: 13px;
+      padding: 12px 16px; border-radius: 13px;
+      border: 1.5px solid rgba(49,56,60,0.12);
+      background: var(--glass); cursor: pointer; text-align: left;
       font-family: 'Outfit', system-ui, sans-serif;
-      font-size: 0.9rem; color: var(--brown); line-height: 1.4;
+      font-size: 0.88rem; color: var(--dark); line-height: 1.4;
       transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
     }
-    .quiz-option:hover { border-color: var(--gold); background: oklch(97% 0.016 80); }
+    .quiz-option:hover { border-color: rgba(49,56,60,0.3); background: var(--glass-strong); }
     .quiz-option:active { transform: scale(0.98); }
-
-    .quiz-option .opt-letter {
-      width: 28px; height: 28px; flex-shrink: 0; border-radius: 8px;
-      background: var(--cream-mid); display: flex; align-items: center;
-      justify-content: center; font-size: 0.72rem; font-weight: 600;
-      letter-spacing: 0.04em; color: var(--brown-mid);
+    .opt-letter {
+      width: 26px; height: 26px; flex-shrink: 0; border-radius: 7px;
+      background: rgba(49,56,60,0.07);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em; color: rgba(49,56,60,0.6);
       transition: background 0.15s ease, color 0.15s ease;
     }
-
-    /* Answer feedback states */
-    .quiz-option.correct {
-      border-color: var(--correct); background: var(--correct-bg);
-      cursor: default;
-    }
+    .quiz-option.correct { border-color: var(--correct); background: var(--correct-bg); cursor: default; }
     .quiz-option.correct .opt-letter { background: var(--correct); color: white; }
-
-    .quiz-option.wrong {
-      border-color: var(--wrong); background: var(--wrong-bg);
-      cursor: default; opacity: 0.8;
-    }
-    .quiz-option.wrong .opt-letter { background: var(--wrong); color: white; }
-
-    .quiz-option.dim { opacity: 0.45; cursor: default; }
+    .quiz-option.wrong   { border-color: var(--wrong); background: var(--wrong-bg); cursor: default; opacity: 0.8; }
+    .quiz-option.wrong   .opt-letter { background: var(--wrong); color: white; }
+    .quiz-option.dim     { opacity: 0.4; cursor: default; }
     .quiz-option:disabled { cursor: default; }
-
     .quiz-feedback {
-      margin-top: 20px; padding: 16px 18px; border-radius: 14px;
-      background: var(--cream-mid); border-left: 3px solid var(--gold);
-      animation: msg-rise 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+      margin-top: 18px; padding: 14px 16px; border-radius: 12px;
+      background: rgba(49,56,60,0.07); border-left: 3px solid var(--dark);
+      animation: msg-rise 0.3s cubic-bezier(0.16,1,0.3,1) both;
     }
-
-    .feedback-verdict {
-      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em;
-      text-transform: uppercase; margin-bottom: 6px;
-    }
+    .feedback-verdict { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 5px; }
     .feedback-verdict.correct-v { color: var(--correct); }
     .feedback-verdict.wrong-v   { color: var(--wrong); }
-
-    .feedback-text { font-size: 0.86rem; color: var(--brown-mid); line-height: 1.55; }
-
-    .quiz-footer {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 28px 24px; gap: 16px;
-    }
-
-    .quiz-score-dots { display: flex; gap: 6px; }
-    .score-dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: var(--gold-light); transition: background 0.3s ease;
-    }
+    .feedback-text { font-size: 0.84rem; color: rgba(49,56,60,0.7); line-height: 1.55; }
+    .quiz-footer { display: flex; align-items: center; justify-content: space-between; padding: 14px 26px 22px; gap: 14px; }
+    .quiz-score-dots { display: flex; gap: 5px; }
+    .score-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(49,56,60,0.2); transition: background 0.3s ease; }
     .score-dot.hit  { background: var(--correct); }
     .score-dot.miss { background: var(--wrong); opacity: 0.5; }
-
     .quiz-next-btn, .quiz-finish-btn {
-      padding: 10px 20px; border-radius: 12px; border: none;
-      background: var(--gold-dark); color: var(--cream);
+      padding: 9px 18px; border-radius: 11px; border: none;
+      background: var(--dark); color: var(--gold);
       font-family: 'Outfit', system-ui, sans-serif;
-      font-size: 0.88rem; font-weight: 500; cursor: pointer;
-      transition: background 0.15s ease, transform 0.1s ease;
-      margin-left: auto;
+      font-size: 0.87rem; font-weight: 500; cursor: pointer;
+      transition: opacity 0.15s ease, transform 0.1s ease; margin-left: auto;
     }
-    .quiz-next-btn:hover, .quiz-finish-btn:hover { background: var(--brown-mid); }
-    .quiz-next-btn:active, .quiz-finish-btn:active { transform: scale(0.95); }
-
-    /* Final score screen */
-    .quiz-final {
-      padding: 36px 28px;
-      text-align: center;
-      animation: msg-rise 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
-    }
-
+    .quiz-next-btn:hover, .quiz-finish-btn:hover { opacity: 0.82; }
+    .quiz-next-btn:active, .quiz-finish-btn:active { transform: scale(0.96); }
+    .quiz-final { padding: 34px 26px; text-align: center; animation: msg-rise 0.35s cubic-bezier(0.16,1,0.3,1) both; }
     .final-score-ring {
-      width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 20px;
-      border: 3px solid var(--gold-light);
+      width: 96px; height: 96px; border-radius: 50%; margin: 0 auto 18px;
+      border: 3px solid rgba(49,56,60,0.15);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background: white;
+      background: var(--glass-strong);
     }
-
-    .final-score-num {
-      font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: 2.4rem; font-weight: 300; line-height: 1; color: var(--brown);
-    }
-
-    .final-score-label {
-      font-size: 0.6rem; font-weight: 500; letter-spacing: 0.12em;
-      text-transform: uppercase; color: var(--brown-light);
-    }
-
-    .final-verdict {
-      font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: 1.5rem; font-weight: 400; color: var(--brown); margin-bottom: 8px;
-    }
-
-    .final-sub { font-size: 0.86rem; color: var(--brown-light); margin-bottom: 24px; }
-
+    .final-score-num { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 2.3rem; font-weight: 300; line-height: 1; color: var(--dark); }
+    .final-score-label { font-size: 0.58rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(49,56,60,0.5); }
+    .final-verdict { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.45rem; font-weight: 400; color: var(--dark); margin-bottom: 7px; }
+    .final-sub { font-size: 0.85rem; color: rgba(49,56,60,0.55); margin-bottom: 22px; }
     .quiz-again-btn {
-      padding: 12px 28px; border-radius: 14px; border: none;
-      background: var(--gold-dark); color: var(--cream);
-      font-family: 'Outfit', system-ui, sans-serif;
-      font-size: 0.9rem; font-weight: 500; cursor: pointer;
-      transition: background 0.15s ease, transform 0.1s ease;
+      padding: 11px 26px; border-radius: 13px; border: none;
+      background: var(--dark); color: var(--gold);
+      font-family: 'Outfit', system-ui, sans-serif; font-size: 0.9rem; font-weight: 500; cursor: pointer;
+      transition: opacity 0.15s ease, transform 0.1s ease;
     }
-    .quiz-again-btn:hover { background: var(--brown-mid); }
+    .quiz-again-btn:hover { opacity: 0.82; }
 
-    /* ─────────────── Selfie Modal ─────────────── */
+    /* ── Selfie modal ─────────────────────────────────────────────────── */
     .selfie-panel { max-width: 480px; }
-
-    .selfie-body { padding: 20px 24px 16px; }
-
-    .selfie-viewport {
-      position: relative; border-radius: 18px; overflow: hidden;
-      background: oklch(20% 0.03 68); aspect-ratio: 4/3;
-    }
-
-    #selfie-video, #selfie-canvas {
-      width: 100%; height: 100%; object-fit: cover; display: block;
-    }
-
+    .selfie-body  { padding: 18px 22px 14px; }
+    .selfie-viewport { position: relative; border-radius: 16px; overflow: hidden; background: #1a1e20; aspect-ratio: 4/3; }
+    #selfie-video, #selfie-canvas { width: 100%; height: 100%; object-fit: cover; display: block; }
     #selfie-video { transform: scaleX(-1); }
-
-    .selfie-countdown {
-      position: absolute; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      background: oklch(15% 0.04 68 / 0.5);
-    }
-
-    .countdown-num {
-      font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: 8rem; font-weight: 300; color: white;
-      text-shadow: 0 4px 24px oklch(0% 0 0 / 0.5);
-      animation: countdown-pop 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
-    }
-
-    @keyframes countdown-pop {
-      from { opacity: 0; transform: scale(1.6); }
-      to   { opacity: 1; transform: scale(1); }
-    }
-
-    .selfie-camera-error {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      height: 100%; gap: 12px; padding: 24px; text-align: center;
-    }
+    .selfie-countdown { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(20,24,26,0.5); }
+    .countdown-num { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 8rem; font-weight: 300; color: white; text-shadow: 0 4px 24px rgba(0,0,0,0.5); animation: countdown-pop 0.9s cubic-bezier(0.16,1,0.3,1) both; }
+    .selfie-camera-error { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 12px; padding: 24px; text-align: center; }
     .selfie-camera-error-icon { font-size: 2.5rem; opacity: 0.5; }
-    .selfie-camera-error-text { font-size: 0.88rem; color: oklch(80% 0.02 80); line-height: 1.5; }
-
-    .selfie-caption {
-      font-size: 0.78rem; color: var(--brown-light); text-align: center;
-      margin-top: 12px; font-style: italic; min-height: 1.2em;
-      transition: opacity 0.2s ease;
-    }
-
-    .selfie-footer {
-      display: flex; gap: 10px; align-items: center; justify-content: center;
-      padding: 14px 24px 24px;
-    }
-
+    .selfie-camera-error-text { font-size: 0.88rem; color: rgba(255,255,255,0.7); line-height: 1.5; }
+    .selfie-caption { font-size: 0.77rem; color: rgba(49,56,60,0.55); text-align: center; margin-top: 10px; font-style: italic; min-height: 1.2em; }
+    .selfie-footer { display: flex; gap: 9px; align-items: center; justify-content: center; padding: 12px 22px 22px; }
     .selfie-capture-btn {
-      flex: 1; padding: 13px 20px; border-radius: 14px; border: none;
-      background: var(--gold-dark); color: var(--cream);
-      font-family: 'Outfit', system-ui, sans-serif;
-      font-size: 0.95rem; font-weight: 600; cursor: pointer;
-      transition: background 0.15s ease, transform 0.1s ease;
+      flex: 1; padding: 12px 18px; border-radius: 13px; border: none;
+      background: var(--dark); color: var(--gold);
+      font-family: 'Outfit', system-ui, sans-serif; font-size: 0.94rem; font-weight: 600; cursor: pointer;
+      transition: opacity 0.15s ease, transform 0.1s ease;
     }
-    .selfie-capture-btn:hover { background: var(--brown-mid); }
-    .selfie-capture-btn:active { transform: scale(0.97); }
+    .selfie-capture-btn:hover   { opacity: 0.82; }
+    .selfie-capture-btn:active  { transform: scale(0.97); }
     .selfie-capture-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
     .selfie-secondary-btn {
-      padding: 13px 18px; border-radius: 14px; border: 1.5px solid var(--gold-light);
-      background: white; color: var(--brown-mid);
-      font-family: 'Outfit', system-ui, sans-serif;
-      font-size: 0.88rem; font-weight: 500; cursor: pointer;
-      transition: border-color 0.15s ease, color 0.15s ease;
+      padding: 12px 16px; border-radius: 13px; border: 1.5px solid rgba(49,56,60,0.15);
+      background: var(--glass); color: rgba(49,56,60,0.7);
+      font-family: 'Outfit', system-ui, sans-serif; font-size: 0.86rem; font-weight: 500; cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
     }
-    .selfie-secondary-btn:hover { border-color: var(--gold); color: var(--brown); }
+    .selfie-secondary-btn:hover { border-color: rgba(49,56,60,0.3); background: var(--glass-strong); color: var(--dark); }
 
-    /* ─────────────── Mobile ─────────────── */
+    /* ── Mobile ───────────────────────────────────────────────────────── */
     @media (max-width: 520px) {
-      body { padding: 0; }
-      #chat-container { border-radius: 0; height: 100dvh; max-width: 100%; }
-      #chat-messages  { padding: 20px; }
-      #chat-header    { padding: 22px 24px 18px; }
-      #chat-input-row { padding: 12px 16px 18px; }
-      .modal-overlay  { padding: 12px; }
+      :root { --w-open: calc(100vw - 24px); --h-open: calc(100dvh - 24px); }
+      .modal-overlay { padding: 12px; }
     }
 
-    /* ─────────────── Reduced motion ─────────────── */
+    /* ── Reduced motion ───────────────────────────────────────────────── */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
       #chat-messages { scroll-behavior: auto; }
-      #send-btn:active { transform: none; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ── Chat Panel ── -->
-  <div id="chat-container">
+  <div id="widget-wrapper" role="button" tabindex="0" aria-label="Open Cheese Master chat">
 
-    <header id="chat-header">
-      <p class="header-eyebrow">The Cheese Salon</p>
-      <h1 class="header-title">Cheese <em>Master</em></h1>
-      <div class="header-ornament"><div class="ornament-gem"></div></div>
-    </header>
+    <!-- Cheese wedge icon (visible when closed) -->
+    <svg id="cheese-icon" viewBox="0 0 80 80" aria-hidden="true">
+      <!-- cheese circle with wedge cut out: center → point on circle → large arc → back to center -->
+      <path fill="#efc74d" d="M40,40 L75.1,54.5 A38,38 0 1 0 54.5,75.1 Z"/>
+    </svg>
 
-    <div id="chat-messages" role="log" aria-live="polite" aria-label="Chat messages">
-      <div class="msg-wrapper bot">
-        <span class="msg-sender">Cheese Master</span>
-        <div class="msg bot">Bonjour! I'm your Cheese Master — ask me anything about the world of cheese. Type <strong>/</strong> to explore what I can do for you.</div>
-      </div>
-    </div>
+    <!-- Chat panel (morphs from circle to panel) -->
+    <div id="chat-panel">
 
-    <div id="palette-wrapper" role="listbox" aria-label="Available commands" aria-hidden="true">
-      <div id="command-palette">
-        <div class="palette-inner">
-          <p class="palette-label">Commands</p>
-          <ul class="palette-list" id="command-list"></ul>
+      <div id="chat-header">
+        <span class="header-pill">🤖🧀</span>
+        <div class="header-text">
+          <span class="header-eyebrow">The Cheese Salon</span>
+          <span class="header-title">Cheese Master</span>
         </div>
       </div>
-    </div>
 
-    <div id="chat-input-row">
-      <label for="chat-input" class="visually-hidden">Ask the Cheese Master</label>
-      <input
-        id="chat-input" type="text"
-        placeholder="Which cheese has you curious?  (try typing /)"
-        autocomplete="off" aria-label="Ask the Cheese Master"
-        aria-autocomplete="list" aria-controls="command-list"
-      />
-      <button id="send-btn" type="button" aria-label="Send message">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M12 19V5"/><path d="M5 12l7-7 7 7"/>
-        </svg>
-      </button>
-    </div>
+      <div id="chat-messages" role="log" aria-live="polite" aria-label="Chat messages">
+        <div class="msg-wrapper bot">
+          <span class="msg-sender">Cheese Master</span>
+          <div class="msg bot">Bonjour! I'm your Cheese Master — ask me anything about the world of cheese. Type <strong>/</strong> to explore what I can do for you.</div>
+        </div>
+      </div>
 
+      <div id="palette-wrapper" role="listbox" aria-label="Available commands" aria-hidden="true">
+        <div id="command-palette">
+          <div class="palette-inner">
+            <p class="palette-label">Commands</p>
+            <ul class="palette-list" id="command-list"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div id="chat-input-row">
+        <label for="chat-input" class="visually-hidden">Ask the Cheese Master</label>
+        <input
+          id="chat-input" type="text"
+          placeholder="Which cheese has you curious?  (try /)"
+          autocomplete="off" aria-label="Ask the Cheese Master"
+          aria-autocomplete="list" aria-controls="command-list"
+        />
+        <button id="send-btn" type="button" aria-label="Send message">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 19V5"/><path d="M5 12l7-7 7 7"/>
+          </svg>
+        </button>
+      </div>
+
+    </div>
   </div>
 
-  <!-- ── Quiz Modal ── -->
+  <!-- Quiz Modal -->
   <div id="quiz-modal" class="modal-overlay" hidden
        role="dialog" aria-modal="true" aria-labelledby="quiz-question-text">
     <div class="modal-backdrop" id="quiz-backdrop"></div>
@@ -624,7 +500,7 @@
     </div>
   </div>
 
-  <!-- ── Selfie Modal ── -->
+  <!-- Selfie Modal -->
   <div id="selfie-modal" class="modal-overlay" hidden
        role="dialog" aria-modal="true" aria-label="Cheese selfie camera">
     <div class="modal-backdrop" id="selfie-backdrop"></div>
@@ -644,7 +520,7 @@
         <p class="selfie-caption" id="selfie-caption">Center your face in the frame</p>
       </div>
       <div class="selfie-footer">
-        <button class="selfie-secondary-btn" id="selfie-retake" hidden>↩ Retake</button>
+        <button class="selfie-secondary-btn" id="selfie-retake"   hidden>↩ Retake</button>
         <button class="selfie-capture-btn"   id="selfie-capture">🧀 Cheese Me!</button>
         <button class="selfie-secondary-btn" id="selfie-download" hidden>↓ Save</button>
       </div>
@@ -653,12 +529,64 @@
 
   <script type="module" src="js/index.js"></script>
   <script>
-    // Local dev → localhost. Deployed → your Render URL (replace below after deploying)
-    const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    // Local dev → localhost:8000. Deployed → replace with your Render URL.
+    const _h = window.location.hostname;
+    const API_URL = (_h === 'localhost' || _h === '127.0.0.1' || _h === '' || window.location.protocol === 'file:')
       ? "http://localhost:8000/chat"
       : "https://YOUR-RENDER-APP-NAME.onrender.com/chat";
 
-    // ── Quiz questions ──────────────────────────────────────────────────────
+    // ── Widget open / close ──────────────────────────────────────────────
+    const widgetWrapper = document.getElementById('widget-wrapper');
+    let closeTimer = null;
+    let widgetOpen  = false;
+    const isTouchOnly = window.matchMedia('(hover: none)').matches;
+
+    function openWidget() {
+      if (widgetOpen) return;
+      widgetOpen = true;
+      widgetWrapper.style.transition =
+        'width 0.55s cubic-bezier(0.22,1.4,0.36,1), height 0.55s cubic-bezier(0.22,1.4,0.36,1)';
+      widgetWrapper.classList.add('is-open');
+      widgetWrapper.removeAttribute('aria-label');
+      // Focus input after panel finishes opening
+      setTimeout(() => document.getElementById('chat-input').focus(), 520);
+    }
+
+    function closeWidget() {
+      if (!widgetOpen) return;
+      widgetOpen = false;
+      widgetWrapper.style.transition =
+        'width 0.4s cubic-bezier(0.4,0,0.6,1), height 0.4s cubic-bezier(0.4,0,0.6,1)';
+      widgetWrapper.classList.remove('is-open');
+      widgetWrapper.setAttribute('aria-label', 'Open Cheese Master chat');
+    }
+
+    if (isTouchOnly) {
+      // Mobile: tap to open, tap outside to close
+      widgetWrapper.addEventListener('click', (e) => { if (!widgetOpen) openWidget(); });
+      document.addEventListener('click', (e) => {
+        if (widgetOpen && !widgetWrapper.contains(e.target)) closeWidget();
+      });
+    } else {
+      // Desktop: hover to open, delayed hover-out to close
+      widgetWrapper.addEventListener('mouseenter', () => {
+        clearTimeout(closeTimer);
+        openWidget();
+      });
+      widgetWrapper.addEventListener('mouseleave', () => {
+        clearTimeout(closeTimer);
+        closeTimer = setTimeout(closeWidget, 1000);
+      });
+    }
+
+    // Keyboard: Enter / Space to open when focused
+    widgetWrapper.addEventListener('keydown', (e) => {
+      if ((e.key === 'Enter' || e.key === ' ') && !widgetOpen) {
+        e.preventDefault(); openWidget();
+      }
+    });
+
+    // ── Quiz questions ────────────────────────────────────────────────────
     const QUIZ_QUESTIONS = [
       {
         q: "Which country is the exclusive producer of authentic Parmigiano-Reggiano?",
@@ -734,75 +662,45 @@
       },
     ];
 
-    // ── Commands ────────────────────────────────────────────────────────────
+    // ── Commands ──────────────────────────────────────────────────────────
     const COMMANDS = [
-      {
-        cmd: '/quiz', icon: '◇', label: 'Quiz Me',
-        desc: 'Test your cheese knowledge with 5 questions',
-        type: 'local', fn: openQuiz,
-      },
-      {
-        cmd: '/cheeseme', icon: '📸', label: 'Cheese Me',
-        desc: 'Take a selfie & get cheese on your head',
-        type: 'local', fn: openSelfie,
-      },
-      {
-        cmd: '/cheddar', icon: '🟠', label: 'Go Cheddar',
-        desc: 'Watch cheddar drip down and consume the world',
-        type: 'local', fn: openCheddar,
-      },
-      {
-        cmd: '/fact', icon: '◈', label: 'Random Fact',
-        desc: 'Get a surprising cheese fact',
-        type: 'immediate',
-        prompt: 'Share a surprising, delightful, or little-known fact about cheese — something that would make a cheese lover say "I never knew that!"',
-      },
-      {
-        cmd: '/pair', icon: '⊕', label: 'Pairings',
-        desc: 'Food & wine pairings for any cheese',
-        type: 'template', arg: 'cheese name',
-        promptFn: (a) => `What foods, wines, and drinks pair best with ${a}? Give 4–5 specific pairings with a brief explanation of why each works.`,
-      },
-      {
-        cmd: '/describe', icon: '◉', label: 'Tasting Notes',
-        desc: 'Evocative sensory description of a cheese',
-        type: 'template', arg: 'cheese name',
-        promptFn: (a) => `Give me rich, evocative tasting notes for ${a} — its texture, rind, aroma, and flavor profile. Make it vivid.`,
-      },
-      {
-        cmd: '/origin', icon: '◎', label: 'Origin Story',
-        desc: 'History & provenance of a cheese',
-        type: 'template', arg: 'cheese name',
-        promptFn: (a) => `Tell me about the origin, history, and cultural significance of ${a}. Where does it come from and why does it matter?`,
-      },
-      {
-        cmd: '/substitute', icon: '⇌', label: 'Find a Sub',
-        desc: 'Best alternatives when you\'re out of a cheese',
-        type: 'template', arg: 'cheese name',
-        promptFn: (a) => `What are the best substitutes for ${a}? For each, explain when it works as a replacement and when it falls short.`,
-      },
-      {
-        cmd: '/board', icon: '◆', label: 'Cheese Board',
-        desc: 'A curated cheese board built just for now',
-        type: 'immediate',
-        prompt: 'Suggest a beautifully curated cheese board: 4–5 cheeses, the right accompaniments, presentation tips, and the rationale behind your choices.',
-      },
-      {
-        cmd: '/season', icon: '◌', label: 'In Season',
-        desc: 'What\'s at peak right now',
-        type: 'immediate',
-        prompt: 'What cheeses are at their absolute peak right now? Give me 3–4 seasonal picks with tasting notes and serving suggestions.',
-      },
+      { cmd: '/quiz',      icon: '◇', label: 'Quiz Me',      desc: 'Test your cheese knowledge with 5 questions', type: 'local', fn: openQuiz },
+      { cmd: '/cheeseme', icon: '📸', label: 'Cheese Me',    desc: 'Take a selfie & get cheese on your head',     type: 'local', fn: openSelfie },
+      { cmd: '/cheddar',  icon: '🟠', label: 'Go Cheddar',   desc: 'Watch cheddar drip down and consume the world', type: 'local', fn: openCheddar },
+      { cmd: '/fact',     icon: '◈', label: 'Random Fact',  desc: 'Get a surprising cheese fact', type: 'immediate',
+        prompt: 'Share a surprising, delightful, or little-known fact about cheese — something that would make a cheese lover say "I never knew that!"' },
+      { cmd: '/pair',     icon: '⊕', label: 'Pairings',     desc: 'Food & wine pairings for any cheese', type: 'template', arg: 'cheese name',
+        promptFn: (a) => `What foods, wines, and drinks pair best with ${a}? Give 4–5 specific pairings with a brief explanation of why each works.` },
+      { cmd: '/describe', icon: '◉', label: 'Tasting Notes', desc: 'Evocative sensory description of a cheese', type: 'template', arg: 'cheese name',
+        promptFn: (a) => `Give me rich, evocative tasting notes for ${a} — its texture, rind, aroma, and flavor profile. Make it vivid.` },
+      { cmd: '/origin',   icon: '◎', label: 'Origin Story', desc: 'History & provenance of a cheese', type: 'template', arg: 'cheese name',
+        promptFn: (a) => `Tell me about the origin, history, and cultural significance of ${a}. Where does it come from and why does it matter?` },
+      { cmd: '/substitute', icon: '⇌', label: 'Find a Sub', desc: 'Best alternatives when you\'re out of a cheese', type: 'template', arg: 'cheese name',
+        promptFn: (a) => `What are the best substitutes for ${a}? For each, explain when it works as a replacement and when it falls short.` },
+      { cmd: '/board',    icon: '◆', label: 'Cheese Board', desc: 'A curated cheese board built just for now', type: 'immediate',
+        prompt: 'Suggest a beautifully curated cheese board: 4–5 cheeses, the right accompaniments, presentation tips, and the rationale behind your choices.' },
+      { cmd: '/season',   icon: '◌', label: 'In Season',    desc: 'What\'s at peak right now', type: 'immediate',
+        prompt: 'What cheeses are at their absolute peak right now? Give me 3–4 seasonal picks with tasting notes and serving suggestions.' },
+      { cmd: '/joke',     icon: '😄', label: 'Cheese Joke',  desc: 'Hit me with a cheese pun or joke', type: 'immediate',
+        prompt: 'Tell me a clever, funny, or groan-worthy cheese joke or pun. Make it genuinely witty, not generic.' },
+      { cmd: '/recipe',   icon: '🍳', label: 'Recipe',       desc: 'A recipe starring any cheese', type: 'template', arg: 'cheese name',
+        promptFn: (a) => `Give me a delicious recipe where ${a} is the star ingredient. Include ingredients, steps, and a tip for getting the best flavour out of the cheese.` },
+      { cmd: '/compare',  icon: '⚖', label: 'Compare',      desc: 'Compare two cheeses side by side', type: 'template', arg: 'cheese A and cheese B',
+        promptFn: (a) => `Compare ${a} side by side: origin, texture, flavour profile, best uses, and which type of person would prefer each. Keep it lively and opinionated.` },
+      { cmd: '/country',  icon: '🌍', label: 'By Country',   desc: 'Explore cheeses from any country', type: 'template', arg: 'country name',
+        promptFn: (a) => `Tell me about the cheese culture of ${a}. What are its most iconic cheeses, what makes them unique, and what should a first-time explorer try first?` },
+      { cmd: '/emoji',    icon: '✨', label: 'Cheese Emoji',  desc: 'Describe any cheese only in emojis', type: 'template', arg: 'cheese name',
+        promptFn: (a) => `Describe ${a} using only emojis — capture its flavour, texture, origin, and vibe. Then give a one-sentence explanation of your emoji choices.` },
     ];
 
-    // ── DOM refs ────────────────────────────────────────────────────────────
+    // ── DOM refs ──────────────────────────────────────────────────────────
     const messagesEl     = document.getElementById('chat-messages');
     const inputEl        = document.getElementById('chat-input');
     const sendBtn        = document.getElementById('send-btn');
     const paletteWrapper = document.getElementById('palette-wrapper');
     const commandList    = document.getElementById('command-list');
 
-    // ── Palette state ────────────────────────────────────────────────────────
+    // ── Palette state ─────────────────────────────────────────────────────
     let paletteOpen  = false;
     let activeIndex  = 0;
     let filteredCmds = [];
@@ -881,7 +779,7 @@
       }
     }
 
-    // ── Message helpers ──────────────────────────────────────────────────────
+    // ── Message helpers ───────────────────────────────────────────────────
     function addMessage(text, role, isCommand = false) {
       const isTyping = role === 'bot typing';
       const baseRole = isTyping ? 'bot' : role;
@@ -936,7 +834,7 @@
       const [, name, arg] = match;
       const cmd = COMMANDS.find(c => c.cmd === `/${name}`);
       if (!cmd) return null;
-      if (cmd.type === 'local') return { local: true, fn: cmd.fn };
+      if (cmd.type === 'local')     return { local: true, fn: cmd.fn };
       if (cmd.type === 'immediate') return { display: cmd.cmd, prompt: cmd.prompt };
       if (!arg) return null;
       return { display: raw, prompt: cmd.promptFn(arg.trim()) };
@@ -951,7 +849,7 @@
         const resolved = resolveSlashCommand(raw);
         if (!resolved) {
           addMessage(raw, 'user', true);
-          addMessage('Unknown or incomplete command. Type / to see what\'s available.', 'bot');
+          addMessage("Unknown or incomplete command. Type / to see what's available.", 'bot');
           return;
         }
         if (resolved.local) { resolved.fn(); return; }
@@ -984,32 +882,31 @@
 
     sendBtn.addEventListener('click', sendMessage);
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // ── QUIZ ENGINE ────────────────────────────────────────────────────────
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // ── QUIZ ENGINE ──────────────────────────────────────────────────────
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    const QUIZ_LENGTH = 5;
-    const quizModal   = document.getElementById('quiz-modal');
-    const quizBody    = document.getElementById('quiz-body');
-    const quizFooter  = document.getElementById('quiz-footer');
-    const quizProgress= document.getElementById('quiz-progress-bar');
-    const quizCounter = document.getElementById('quiz-counter');
-    const quizQText   = document.getElementById('quiz-question-text');
-    const quizOptions = document.getElementById('quiz-options');
-    const quizFeedback= document.getElementById('quiz-feedback');
-    const feedVerdict = document.getElementById('feedback-verdict');
-    const feedText    = document.getElementById('feedback-text');
-    const quizDots    = document.getElementById('quiz-score-dots');
-    const quizNext    = document.getElementById('quiz-next');
+    const QUIZ_LENGTH  = 5;
+    const quizModal    = document.getElementById('quiz-modal');
+    const quizBody     = document.getElementById('quiz-body');
+    const quizFooter   = document.getElementById('quiz-footer');
+    const quizProgress = document.getElementById('quiz-progress-bar');
+    const quizCounter  = document.getElementById('quiz-counter');
+    const quizQText    = document.getElementById('quiz-question-text');
+    const quizOptions  = document.getElementById('quiz-options');
+    const quizFeedback = document.getElementById('quiz-feedback');
+    const feedVerdict  = document.getElementById('feedback-verdict');
+    const feedText     = document.getElementById('feedback-text');
+    const quizDots     = document.getElementById('quiz-score-dots');
+    const quizNext     = document.getElementById('quiz-next');
 
     let quizQueue   = [];
     let quizIndex   = 0;
     let quizScore   = 0;
-    let quizResults = []; // true/false per question
+    let quizResults = [];
 
     function openQuiz() {
-      // Shuffle and pick QUIZ_LENGTH questions
-      quizQueue = [...QUIZ_QUESTIONS].sort(() => Math.random() - 0.5).slice(0, QUIZ_LENGTH);
+      quizQueue   = [...QUIZ_QUESTIONS].sort(() => Math.random() - 0.5).slice(0, QUIZ_LENGTH);
       quizIndex   = 0;
       quizScore   = 0;
       quizResults = [];
@@ -1017,22 +914,17 @@
       loadQuizQuestion();
     }
 
-    function closeQuiz() {
-      quizModal.hidden = true;
-    }
+    function closeQuiz() { quizModal.hidden = true; }
 
     function loadQuizQuestion() {
-      const q    = quizQueue[quizIndex];
-      const num  = quizIndex + 1;
-      const pct  = ((quizIndex) / QUIZ_LENGTH) * 100;
-
+      const q   = quizQueue[quizIndex];
+      const pct = (quizIndex / QUIZ_LENGTH) * 100;
       quizProgress.style.width = `${pct}%`;
-      quizCounter.textContent  = `Question ${num} of ${QUIZ_LENGTH}`;
+      quizCounter.textContent  = `Question ${quizIndex + 1} of ${QUIZ_LENGTH}`;
       quizQText.textContent    = q.q;
       quizFeedback.hidden      = true;
       quizNext.hidden          = true;
 
-      // Score dots
       quizDots.innerHTML = '';
       for (let i = 0; i < QUIZ_LENGTH; i++) {
         const dot = document.createElement('div');
@@ -1041,7 +933,6 @@
         quizDots.appendChild(dot);
       }
 
-      // Build option buttons
       quizOptions.innerHTML = '';
       const letters = ['A', 'B', 'C', 'D'];
       q.options.forEach((opt, i) => {
@@ -1060,26 +951,21 @@
       quizScore  += correct ? 1 : 0;
       quizResults.push(correct);
 
-      // Lock all options, apply feedback styles
-      const btns = quizOptions.querySelectorAll('.quiz-option');
-      btns.forEach((btn, i) => {
+      quizOptions.querySelectorAll('.quiz-option').forEach((btn, i) => {
         btn.disabled = true;
         if (i === q.answer) btn.classList.add('correct');
         else if (i === chosen && !correct) btn.classList.add('wrong');
         else btn.classList.add('dim');
       });
 
-      // Update dot
       const dots = quizDots.querySelectorAll('.score-dot');
       if (dots[quizIndex]) dots[quizIndex].classList.add(correct ? 'hit' : 'miss');
 
-      // Show feedback
-      feedVerdict.textContent  = correct ? '✓ Correct!' : '✗ Not quite';
-      feedVerdict.className    = `feedback-verdict ${correct ? 'correct-v' : 'wrong-v'}`;
-      feedText.textContent     = q.fact;
-      quizFeedback.hidden      = false;
+      feedVerdict.textContent = correct ? '✓ Correct!' : '✗ Not quite';
+      feedVerdict.className   = `feedback-verdict ${correct ? 'correct-v' : 'wrong-v'}`;
+      feedText.textContent    = q.fact;
+      quizFeedback.hidden     = false;
 
-      // Show Next or Finish
       quizNext.textContent = (quizIndex === QUIZ_LENGTH - 1) ? 'See results →' : 'Next →';
       quizNext.hidden = false;
     }
@@ -1093,14 +979,13 @@
     function showQuizFinal() {
       quizProgress.style.width = '100%';
       const verdicts = [
-        ['An aged master!', 'Your cheese knowledge is truly extraordinary.'],
-        ['Impressively gouda!', 'You clearly have exquisite taste in fromage.'],
-        ['Well-aged palate!', 'A few more ripening sessions and you\'ll be perfect.'],
-        ['Still maturing…', 'Every great cheese takes time. Keep learning!'],
+        ['An aged master!',       'Your cheese knowledge is truly extraordinary.'],
+        ['Impressively gouda!',   'You clearly have exquisite taste in fromage.'],
+        ['Well-aged palate!',     "A few more ripening sessions and you'll be perfect."],
+        ['Still maturing…',       'Every great cheese takes time. Keep learning!'],
         ['Fresh out of the vat!', 'Even the finest cheeses needed time to develop.'],
       ];
       const v = quizScore === 5 ? 0 : quizScore >= 4 ? 1 : quizScore >= 3 ? 2 : quizScore >= 2 ? 3 : 4;
-
       quizBody.innerHTML = `
         <div class="quiz-final">
           <div class="final-score-ring">
@@ -1110,53 +995,49 @@
           <p class="final-verdict">${verdicts[v][0]}</p>
           <p class="final-sub">${verdicts[v][1]}</p>
           <button class="quiz-again-btn" id="quiz-again">Play again</button>
-        </div>
-      `;
+        </div>`;
       quizFooter.innerHTML = '';
-
       document.getElementById('quiz-again').addEventListener('click', openQuiz);
     }
 
     document.getElementById('quiz-close').addEventListener('click', closeQuiz);
     document.getElementById('quiz-backdrop').addEventListener('click', closeQuiz);
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // ── SELFIE / CHEESEME ENGINE ────────────────────────────────────────────
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // ── SELFIE ENGINE ────────────────────────────────────────────────────
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    const selfieModal    = document.getElementById('selfie-modal');
-    const selfieViewport = document.getElementById('selfie-viewport');
-    const selfieVideo    = document.getElementById('selfie-video');
-    const selfieCanvas   = document.getElementById('selfie-canvas');
-    const selfieCountdown= document.getElementById('selfie-countdown');
-    const countdownNum   = document.getElementById('countdown-num');
-    const selfieCapture  = document.getElementById('selfie-capture');
-    const selfieRetake   = document.getElementById('selfie-retake');
-    const selfieDownload = document.getElementById('selfie-download');
-    const selfieEyebrow  = document.getElementById('selfie-eyebrow');
-    const selfieCaption  = document.getElementById('selfie-caption');
+    const selfieModal     = document.getElementById('selfie-modal');
+    const selfieViewport  = document.getElementById('selfie-viewport');
+    const selfieVideo     = document.getElementById('selfie-video');
+    const selfieCanvas    = document.getElementById('selfie-canvas');
+    const selfieCountdown = document.getElementById('selfie-countdown');
+    const countdownNum    = document.getElementById('countdown-num');
+    const selfieCapture   = document.getElementById('selfie-capture');
+    const selfieRetake    = document.getElementById('selfie-retake');
+    const selfieDownload  = document.getElementById('selfie-download');
+    const selfieEyebrow   = document.getElementById('selfie-eyebrow');
+    const selfieCaption   = document.getElementById('selfie-caption');
 
     let cameraStream = null;
 
     const SELFIE_CAPTIONS = [
       'Looking absolutely gouda!',
       'Nacho average selfie!',
-      'You\'re looking extra sharp today!',
+      "You're looking extra sharp today!",
       'Feta-stic shot!',
       'Say fromage!',
-      'You\'ve got great taste — literally.',
+      "You've got great taste — literally.",
     ];
 
     async function openSelfie() {
       selfieModal.hidden = false;
       selfieEyebrow.textContent = 'Cheese Me';
       selfieCaption.textContent = 'Center your face in the frame';
-
-      // Reset UI
-      selfieVideo.hidden  = false;
-      selfieCanvas.hidden = true;
+      selfieVideo.hidden   = false;
+      selfieCanvas.hidden  = true;
       selfieCountdown.hidden = true;
-      selfieCapture.hidden  = false;
+      selfieCapture.hidden   = false;
       selfieCapture.disabled = false;
       selfieCapture.textContent = '🧀 Cheese Me!';
       selfieRetake.hidden  = true;
@@ -1169,7 +1050,6 @@
         selfieVideo.srcObject = cameraStream;
         await selfieVideo.play();
       } catch (err) {
-        // getUserMedia throws on denial; play() can throw AbortError if stream ended — ignore that
         if (err.name === 'AbortError') return;
         selfieViewport.innerHTML = `
           <div class="selfie-camera-error">
@@ -1181,12 +1061,8 @@
     }
 
     function closeSelfie() {
-      if (cameraStream) {
-        cameraStream.getTracks().forEach(t => t.stop());
-        cameraStream = null;
-      }
+      if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
       selfieModal.hidden = true;
-      // Restore the video element (in case the viewport was replaced)
       selfieViewport.innerHTML = '';
       selfieViewport.appendChild(selfieVideo);
       selfieViewport.appendChild(selfieCanvas);
@@ -1197,72 +1073,56 @@
     async function startCountdown() {
       selfieCapture.disabled = true;
       selfieCountdown.hidden = false;
-
       for (let i = 3; i >= 1; i--) {
         countdownNum.textContent = i;
-        // Restart the CSS animation without touching the DOM
         countdownNum.style.animation = 'none';
-        countdownNum.offsetHeight; // force reflow so the browser notices the reset
-        countdownNum.style.animation = 'countdown-pop 0.85s cubic-bezier(0.16, 1, 0.3, 1) both';
-        await sleep(900);
+        countdownNum.offsetHeight;
+        countdownNum.style.animation = 'countdown-pop 0.85s cubic-bezier(0.16,1,0.3,1) both';
+        await new Promise(r => setTimeout(r, 900));
       }
-
       selfieCountdown.hidden = true;
       takeSelfie();
     }
-
-    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
     function takeSelfie() {
       const W = selfieVideo.videoWidth  || 640;
       const H = selfieVideo.videoHeight || 480;
       selfieCanvas.width  = W;
       selfieCanvas.height = H;
-
       const ctx = selfieCanvas.getContext('2d');
-
-      // Mirror to match the mirrored video preview
-      ctx.translate(W, 0);
-      ctx.scale(-1, 1);
+      ctx.translate(W, 0); ctx.scale(-1, 1);
       ctx.drawImage(selfieVideo, 0, 0, W, H);
       ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-      // Stop camera
       if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
 
-      // Pick a cheese PNG (transparent background preferred)
       const pool = (window.CHEESE_PNGS && window.CHEESE_PNGS.length > 0)
         ? window.CHEESE_PNGS
         : ['./src/cheese/cheese_PNG10-3878731391.png'];
       const cheeseSrc = pool[Math.floor(Math.random() * pool.length)];
-
       const cheeseImg = new Image();
       cheeseImg.onload = () => {
         const cheeseW = W * 0.55;
         const cheeseH = (cheeseImg.naturalHeight / cheeseImg.naturalWidth) * cheeseW;
         const cx = (W - cheeseW) / 2;
-        const cy = -cheeseH * 0.28; // sit just on top of the head
+        const cy = -cheeseH * 0.28;
         const angle = (Math.random() - 0.5) * 0.22;
-
         ctx.save();
         ctx.translate(cx + cheeseW / 2, cy + cheeseH / 2);
         ctx.rotate(angle);
         ctx.drawImage(cheeseImg, -cheeseW / 2, -cheeseH / 2, cheeseW, cheeseH);
         ctx.restore();
-
         showSelfieResult();
       };
-      cheeseImg.onerror = () => showSelfieResult(); // show photo even if cheese fails
+      cheeseImg.onerror = () => showSelfieResult();
       cheeseImg.src = cheeseSrc;
     }
 
     function showSelfieResult() {
       selfieVideo.hidden  = true;
       selfieCanvas.hidden = false;
-
       selfieEyebrow.textContent = 'Looking gouda!';
       selfieCaption.textContent = SELFIE_CAPTIONS[Math.floor(Math.random() * SELFIE_CAPTIONS.length)];
-
       selfieCapture.hidden  = true;
       selfieRetake.hidden   = false;
       selfieDownload.hidden = false;
@@ -1271,16 +1131,14 @@
     selfieCapture.addEventListener('click', startCountdown);
 
     selfieRetake.addEventListener('click', () => {
-      // Re-open camera
       selfieVideo.hidden  = false;
       selfieCanvas.hidden = true;
       selfieEyebrow.textContent = 'Cheese Me';
       selfieCaption.textContent = 'Center your face in the frame';
-      selfieCapture.hidden  = false;
+      selfieCapture.hidden   = false;
       selfieCapture.disabled = false;
-      selfieRetake.hidden   = true;
-      selfieDownload.hidden = true;
-
+      selfieRetake.hidden    = true;
+      selfieDownload.hidden  = true;
       navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } }).then(stream => {
         cameraStream = stream;
         selfieVideo.srcObject = stream;
@@ -1298,49 +1156,40 @@
     document.getElementById('selfie-close').addEventListener('click', closeSelfie);
     document.getElementById('selfie-backdrop').addEventListener('click', closeSelfie);
 
-    // Close modals on Escape
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        if (!quizModal.hidden)  closeQuiz();
+        if (!quizModal.hidden)   closeQuiz();
         if (!selfieModal.hidden) closeSelfie();
         const co = document.getElementById('cheddar-overlay');
         if (co) co._dismiss();
       }
     });
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // ── CHEDDAR DRIP ENGINE ─────────────────────────────────────────────────
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // ── CHEDDAR DRIP ENGINE ──────────────────────────────────────────────
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    const CHEDDAR_PALETTE = [
-      '#f4921e', '#e8800e', '#ffaa32', '#d97010',
-      '#f5a030', '#de7808', '#fbb040', '#c86808',
-    ];
+    const CHEDDAR_PALETTE = ['#f4921e','#e8800e','#ffaa32','#d97010','#f5a030','#de7808','#fbb040','#c86808'];
 
     function cheddarShade(hex, amt) {
       const n = parseInt(hex.slice(1), 16);
-      const r = Math.min(255, Math.max(0, (n >> 16)       + amt));
+      const r = Math.min(255, Math.max(0, (n >> 16)        + amt));
       const g = Math.min(255, Math.max(0, ((n >> 8) & 0xff) + amt));
-      const b = Math.min(255, Math.max(0, (n & 0xff)       + amt));
+      const b = Math.min(255, Math.max(0,  (n & 0xff)       + amt));
       return `rgb(${r},${g},${b})`;
     }
 
-    function buildCheddarDrips(W, H) {
+    function buildCheddarDrips(W) {
       const drips = [];
       let x = 0;
       while (x < W + 30) {
-        const w     = 50 + Math.random() * 80;
-        const col   = CHEDDAR_PALETTE[Math.floor(Math.random() * CHEDDAR_PALETTE.length)];
-        const speed = 2.2 + Math.random() * 3.4; // px per frame (~60fps)
+        const w = 50 + Math.random() * 80;
+        const col = CHEDDAR_PALETTE[Math.floor(Math.random() * CHEDDAR_PALETTE.length)];
         drips.push({
-          x:     x - 10,        // slight overlap to kill hairline gaps
-          w:     w + 20,
-          y:     0,             // current tip position (grows downward)
-          speed,
-          delay: Math.random() * 1400,  // stagger start (ms)
-          color: col,
-          r:     (w + 20) * 0.62, // drip-head radius
-          done:  false,
+          x: x - 10, w: w + 20, y: 0,
+          speed: 2.2 + Math.random() * 3.4,
+          delay: Math.random() * 1400,
+          color: col, r: (w + 20) * 0.62, done: false,
         });
         x += w;
       }
@@ -1350,38 +1199,23 @@
     function drawCheddarDrip(ctx, { x, w, y, color, r }, H) {
       if (y <= 0) return;
       const tip = Math.min(y, H + r);
-
-      // Horizontal 3-stop gradient gives each drip a rounded, 3-D look
       const g = ctx.createLinearGradient(x, 0, x + w, 0);
       g.addColorStop(0,    cheddarShade(color, -30));
       g.addColorStop(0.25, cheddarShade(color, +18));
       g.addColorStop(0.55, cheddarShade(color, +32));
       g.addColorStop(0.8,  cheddarShade(color, +10));
       g.addColorStop(1,    cheddarShade(color, -30));
-
-      // Drip shape: rectangular body + bezier blob at the bottom
       ctx.beginPath();
       ctx.moveTo(x, 0);
       ctx.lineTo(x + w, 0);
       ctx.lineTo(x + w, Math.max(0, tip - r * 0.45));
-      ctx.bezierCurveTo(                      // right shoulder → right of blob
-        x + w + r * 0.55, tip + r * 0.05,
-        x + w + r * 0.45, tip + r * 0.65,
-        x + w / 2,         tip + r * 0.58
-      );
-      ctx.bezierCurveTo(                      // left of blob → left shoulder
-        x - r * 0.45,      tip + r * 0.65,
-        x - r * 0.55,      tip + r * 0.05,
-        x,                 Math.max(0, tip - r * 0.45)
-      );
+      ctx.bezierCurveTo(x + w + r * 0.55, tip + r * 0.05, x + w + r * 0.45, tip + r * 0.65, x + w / 2, tip + r * 0.58);
+      ctx.bezierCurveTo(x - r * 0.45, tip + r * 0.65, x - r * 0.55, tip + r * 0.05, x, Math.max(0, tip - r * 0.45));
       ctx.closePath();
       ctx.fillStyle = g;
       ctx.fill();
-
-      // Specular highlight on the drip head — makes it look glossy and liquid
       if (y < H + r * 0.5) {
-        const hx = x + w * 0.33;
-        const hy = tip + r * 0.05;
+        const hx = x + w * 0.33, hy = tip + r * 0.05;
         const hg = ctx.createRadialGradient(hx, hy, 0, hx, hy, r * 0.48);
         hg.addColorStop(0, 'rgba(255,255,255,0.42)');
         hg.addColorStop(1, 'rgba(255,255,255,0)');
@@ -1393,60 +1227,40 @@
     }
 
     function openCheddar() {
-      if (document.getElementById('cheddar-overlay')) return; // no double-trigger
-
-      const W = window.innerWidth;
-      const H = window.innerHeight;
-
-      // Build overlay
+      if (document.getElementById('cheddar-overlay')) return;
+      const W = window.innerWidth, H = window.innerHeight;
       const overlay = document.createElement('div');
       overlay.id = 'cheddar-overlay';
-      Object.assign(overlay.style, {
-        position: 'fixed', inset: '0', zIndex: '9999', pointerEvents: 'all',
-      });
-
+      Object.assign(overlay.style, { position: 'fixed', inset: '0', zIndex: '9999', pointerEvents: 'all' });
       const canvas = document.createElement('canvas');
-      canvas.width  = W;
-      canvas.height = H;
+      canvas.width = W; canvas.height = H;
       Object.assign(canvas.style, { position: 'absolute', inset: '0', display: 'block' });
       overlay.appendChild(canvas);
       document.body.appendChild(overlay);
 
       const ctx   = canvas.getContext('2d');
-      const drips = buildCheddarDrips(W, H);
-      let startTime = null;
-      let rafId;
+      const drips = buildCheddarDrips(W);
+      let startTime = null, rafId;
 
       function animate(ts) {
         if (!startTime) startTime = ts;
         const elapsed = ts - startTime;
-
         ctx.clearRect(0, 0, W, H);
-
         let allDone = true;
         drips.forEach(drip => {
-          // Not started yet — draw nothing, flag as incomplete
           if (elapsed < drip.delay) { allDone = false; return; }
-
           if (!drip.done) {
             drip.y += drip.speed;
             if (drip.y >= H + drip.r) { drip.y = H + drip.r; drip.done = true; }
             else { allDone = false; }
           }
-
           drawCheddarDrip(ctx, drip, H);
         });
-
-        if (allDone) {
-          showCheddarVictory(overlay);
-        } else {
-          rafId = requestAnimationFrame(animate);
-        }
+        if (allDone) showCheddarVictory(overlay);
+        else rafId = requestAnimationFrame(animate);
       }
 
       rafId = requestAnimationFrame(animate);
-
-      // Attach dismiss so Escape key can call it
       overlay._dismiss = () => {
         cancelAnimationFrame(rafId);
         overlay.style.transition = 'opacity 0.55s ease';
@@ -1462,14 +1276,12 @@
         display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
         textAlign: 'center', padding: '24px',
-        animation: 'msg-rise 0.55s cubic-bezier(0.16, 1, 0.3, 1) both',
+        animation: 'msg-rise 0.55s cubic-bezier(0.16,1,0.3,1) both',
       });
       msg.innerHTML = `
         <p style="font-family:'Outfit',sans-serif;font-size:0.65rem;font-weight:500;
                   letter-spacing:0.26em;text-transform:uppercase;
-                  color:rgba(255,255,255,0.65);margin-bottom:16px;">
-          The Cheese Has Won
-        </p>
+                  color:rgba(255,255,255,0.65);margin-bottom:16px;">The Cheese Has Won</p>
         <h2 style="font-family:'Cormorant Garamond',Georgia,serif;
                    font-size:clamp(2.4rem,7vw,4.2rem);font-weight:300;
                    color:white;line-height:1.15;margin-bottom:36px;
@@ -1480,18 +1292,15 @@
           style="padding:13px 32px;border-radius:14px;
                  background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);
                  color:white;font-family:'Outfit',sans-serif;font-size:0.92rem;font-weight:500;
-                 cursor:pointer;letter-spacing:0.02em;
-                 transition:background 0.15s ease,transform 0.1s ease;">
+                 cursor:pointer;letter-spacing:0.02em;transition:background 0.15s ease,transform 0.1s ease;">
           Melt away
-        </button>
-      `;
+        </button>`;
       overlay.appendChild(msg);
-
       const btn = overlay.querySelector('#cheddar-dismiss');
       btn.addEventListener('mouseenter', () => { btn.style.background = 'rgba(255,255,255,0.26)'; });
       btn.addEventListener('mouseleave', () => { btn.style.background = 'rgba(255,255,255,0.15)'; });
-      btn.addEventListener('mousedown',  () => { btn.style.transform = 'scale(0.96)'; });
-      btn.addEventListener('mouseup',    () => { btn.style.transform = 'scale(1)'; });
+      btn.addEventListener('mousedown',  () => { btn.style.transform  = 'scale(0.96)'; });
+      btn.addEventListener('mouseup',    () => { btn.style.transform  = 'scale(1)'; });
       btn.addEventListener('click',      () => overlay._dismiss());
     }
   </script>
