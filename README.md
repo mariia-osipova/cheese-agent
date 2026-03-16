@@ -2,7 +2,8 @@
 
 A beautiful AI-powered cheese chatbot with slash commands, a trivia quiz, a cheese selfie camera, and a cheddar takeover mode. Built with a FastAPI + AstraDB + OpenAI backend and a vanilla JS frontend deployed on GitHub Pages.
 
-**Live demo:** `https://YOUR-GITHUB-USERNAME.github.io/langflow_cheese`
+| ![img_1.png](img_1.png) | ![img.png](img.png) |
+|-------------------------|---|
 
 ---
 
@@ -159,8 +160,7 @@ Copy `.env.example` to `.env` and fill in:
 ### Frontend — GitHub Pages
 
 1. In `docs/index.html`, update the production API URL:
-   ```js
-   : "https://your-render-service.onrender.com/chat";
+   ```js: "https://your-render-service.onrender.com/chat";
    ```
 2. Push to `main`
 3. In your GitHub repo: **Settings → Pages → Source → GitHub Actions**
