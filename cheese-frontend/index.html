@@ -2,73 +2,1499 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="src/cheese/cheese_PNG10-3878731391.png" type="image/png" />
-  <title>Cheesy Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <title>Cheese Master</title>
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-    }
-    /* the chat widget itself */
-    langflow-chat {
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      width: 100% !important;
-      height: 100% !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      box-sizing: border-box;
-      z-index: 9999 !important;
-    }
-    langflow-chat::part(window),
-    langflow-chat::part(container) {
-      position: absolute !important;
-      top: 0 !important;
-      left: 0 !important;
-      width: 100% !important;
-      height: 100% !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      box-shadow: none !important;
-      border: none !important;
-    }
-    langflow-chat, langflow-chat * {
-      max-width: none !important;
-      max-height: none !important;
-      overflow: visible !important;
+    :root {
+      --cream:        oklch(97%   0.012  82);
+      --cream-mid:    oklch(94%   0.018  80);
+      --cream-deep:   oklch(90%   0.025  78);
+      --gold:         oklch(73%   0.130  78);
+      --gold-dark:    oklch(50%   0.115  66);
+      --gold-light:   oklch(87%   0.065  80);
+      --gold-ring:    oklch(73%   0.130  78 / 0.18);
+      --brown:        oklch(21%   0.040  66);
+      --brown-mid:    oklch(40%   0.065  68);
+      --brown-light:  oklch(60%   0.050  70);
+      --shadow-warm:  oklch(20%   0.060  66 / 0.42);
+      --shadow-soft:  oklch(20%   0.050  70 / 0.10);
+      --correct:      oklch(62%   0.155 148);
+      --correct-bg:   oklch(94%   0.060 148);
+      --wrong:        oklch(58%   0.175  25);
+      --wrong-bg:     oklch(94%   0.040  25);
     }
 
-    /* the body background will be swapped by JS */
-    body {
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    [hidden] { display: none !important; }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
     }
+
+    body {
+      font-family: 'Outfit', system-ui, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 120% 100% at 50% 100%, oklch(20% 0.06 68 / 0.55) 0%, transparent 65%),
+        oklch(20% 0.05 68 / 0.18);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .visually-hidden {
+      position: absolute; width: 1px; height: 1px; padding: 0;
+      margin: -1px; overflow: hidden; clip: rect(0,0,0,0);
+      white-space: nowrap; border: 0;
+    }
+
+    /* ─────────────── Chat Panel ─────────────── */
+    #chat-container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 640px;
+      height: min(840px, calc(100vh - 56px));
+      display: flex;
+      flex-direction: column;
+      background: var(--cream);
+      border-radius: 28px;
+      box-shadow:
+        0 0 0 1px oklch(73% 0.13 78 / 0.22),
+        0 2px 4px oklch(20% 0.06 68 / 0.08),
+        0 24px 64px var(--shadow-warm),
+        0 64px 120px oklch(20% 0.06 68 / 0.25);
+      overflow: hidden;
+    }
+
+    /* ─────────────── Header ─────────────── */
+    #chat-header {
+      flex-shrink: 0;
+      padding: 30px 36px 24px;
+      text-align: center;
+      background: var(--cream);
+      border-bottom: 1px solid var(--gold-light);
+      user-select: none;
+    }
+
+    .header-eyebrow {
+      font-size: 0.62rem; font-weight: 500;
+      letter-spacing: 0.26em; text-transform: uppercase;
+      color: var(--gold-dark); margin-bottom: 12px; opacity: 0.85;
+    }
+
+    .header-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(2rem, 5.5vw, 3rem);
+      font-weight: 300; line-height: 1;
+      color: var(--brown); letter-spacing: 0.015em;
+    }
+
+    .header-title em { font-style: italic; font-weight: 400; color: var(--gold-dark); }
+
+    .header-ornament {
+      display: flex; align-items: center; justify-content: center;
+      gap: 14px; margin-top: 18px;
+    }
+
+    .header-ornament::before, .header-ornament::after {
+      content: ''; display: block; height: 1px; width: 56px;
+      background: linear-gradient(to right, transparent, var(--gold), transparent);
+    }
+
+    .ornament-gem {
+      width: 5px; height: 5px; background: var(--gold);
+      transform: rotate(45deg); opacity: 0.75;
+    }
+
+    /* ─────────────── Messages ─────────────── */
+    #chat-messages {
+      flex: 1; overflow-y: auto;
+      padding: 28px 32px;
+      display: flex; flex-direction: column; gap: 22px;
+      scroll-behavior: smooth;
+    }
+
+    #chat-messages::-webkit-scrollbar { width: 3px; }
+    #chat-messages::-webkit-scrollbar-track { background: transparent; }
+    #chat-messages::-webkit-scrollbar-thumb { background: var(--gold-light); border-radius: 2px; }
+
+    .msg-wrapper { display: flex; flex-direction: column; animation: msg-rise 0.38s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    .msg-wrapper.user { align-items: flex-end; }
+    .msg-wrapper.bot  { align-items: flex-start; }
+
+    @keyframes msg-rise {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .msg-sender {
+      font-size: 0.62rem; font-weight: 500; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--brown-light);
+      margin-bottom: 7px; padding: 0 5px;
+    }
+
+    .msg {
+      max-width: 78%; padding: 13px 20px; border-radius: 20px;
+      font-size: 0.94rem; line-height: 1.65; word-break: break-word;
+    }
+
+    .msg.user { background: var(--gold); color: var(--brown); border-bottom-right-radius: 5px; }
+
+    .msg.user.is-command {
+      background: var(--gold-dark); color: var(--cream);
+      font-size: 0.86rem; padding: 9px 16px;
+    }
+
+    .msg.bot { background: white; color: var(--brown); border-bottom-left-radius: 5px; box-shadow: 0 2px 14px var(--shadow-soft); }
+    .msg.error { background: oklch(94% 0.025 30); color: oklch(38% 0.08 30); border-bottom-left-radius: 5px; font-size: 0.88rem; }
+
+    .msg.typing {
+      color: var(--brown-light); font-style: italic;
+      display: flex; align-items: center; gap: 8px; padding: 14px 20px;
+    }
+
+    .typing-dots { display: inline-flex; gap: 5px; align-items: center; flex-shrink: 0; }
+    .typing-dots span {
+      display: block; width: 5px; height: 5px; border-radius: 50%;
+      background: var(--brown-light); animation: dot-bob 1.3s ease-in-out infinite;
+    }
+    .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.30s; }
+
+    @keyframes dot-bob {
+      0%, 55%, 100% { opacity: 0.22; transform: translateY(0); }
+      28%            { opacity: 1;    transform: translateY(-4px); }
+    }
+
+    /* ─────────────── Command Palette ─────────────── */
+    #palette-wrapper {
+      flex-shrink: 0;
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #palette-wrapper.open { grid-template-rows: 1fr; }
+
+    #command-palette { min-height: 0; overflow: hidden; }
+
+    .palette-inner {
+      background: var(--cream-mid);
+      border-top: 1px solid var(--gold-light);
+      border-bottom: 1px solid var(--gold-light);
+    }
+
+    .palette-label {
+      padding: 10px 22px 5px;
+      font-size: 0.57rem; font-weight: 500; letter-spacing: 0.24em;
+      text-transform: uppercase; color: var(--brown-light);
+    }
+
+    .palette-list { list-style: none; padding: 2px 10px 8px; }
+
+    .command-item {
+      width: 100%; display: flex; align-items: center; gap: 13px;
+      padding: 8px 12px; background: none; border: none; border-radius: 12px;
+      cursor: pointer; text-align: left; font-family: 'Outfit', system-ui, sans-serif;
+      transition: background 0.1s ease;
+    }
+    .command-item:hover, .command-item.active { background: oklch(73% 0.130 78 / 0.14); }
+
+    .cmd-icon {
+      width: 32px; height: 32px; flex-shrink: 0; border-radius: 9px;
+      background: white; display: flex; align-items: center; justify-content: center;
+      font-size: 0.95rem; box-shadow: 0 1px 4px var(--shadow-soft);
+    }
+
+    .cmd-body { flex: 1; min-width: 0; }
+    .cmd-name { display: block; font-size: 0.875rem; font-weight: 500; color: var(--brown); line-height: 1.25; }
+    .cmd-desc { display: block; font-size: 0.76rem; color: var(--brown-light); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .cmd-arg-hint {
+      font-size: 0.68rem; color: var(--gold-dark);
+      background: oklch(87% 0.065 80 / 0.6);
+      padding: 2px 8px; border-radius: 5px; font-style: italic;
+      flex-shrink: 0; white-space: nowrap;
+    }
+
+    .palette-empty { padding: 14px 22px; font-size: 0.82rem; color: var(--brown-light); font-style: italic; }
+
+    /* ─────────────── Input Row ─────────────── */
+    #chat-input-row {
+      flex-shrink: 0; display: flex; gap: 10px; align-items: center;
+      padding: 16px 24px 22px;
+      background: var(--cream-mid); border-top: 1px solid var(--gold-light);
+    }
+
+    #chat-input {
+      flex: 1; padding: 13px 20px; font-size: 0.93rem;
+      font-family: 'Outfit', system-ui, sans-serif;
+      border: 1.5px solid var(--gold-light); border-radius: 16px;
+      background: white; color: var(--brown); outline: none; min-height: 50px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    #chat-input::placeholder { color: var(--brown-light); font-style: italic; opacity: 0.75; }
+    #chat-input:focus { border-color: var(--gold-dark); box-shadow: 0 0 0 3px var(--gold-ring); }
+    #chat-input.slash-mode { border-color: var(--gold-dark); background: oklch(97% 0.018 80); }
+
+    #send-btn {
+      width: 50px; height: 50px; flex-shrink: 0; border-radius: 16px; border: none;
+      background: var(--gold-dark); color: var(--cream); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+    #send-btn:hover  { background: var(--brown-mid); }
+    #send-btn:active { background: var(--brown); transform: scale(0.91); }
+    #send-btn:focus-visible { outline: 3px solid var(--gold-dark); outline-offset: 2px; }
+    #send-btn:disabled { opacity: 0.38; cursor: not-allowed; transform: none; }
+    #send-btn svg { width: 17px; height: 17px; display: block; }
+
+    /* ─────────────── Modal Base ─────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px;
+    }
+
+    .modal-overlay[hidden] { display: none; }
+
+    .modal-backdrop {
+      position: absolute; inset: 0;
+      background: oklch(15% 0.04 68 / 0.72);
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-panel {
+      position: relative; z-index: 1;
+      background: var(--cream);
+      border-radius: 28px;
+      box-shadow:
+        0 0 0 1px oklch(73% 0.13 78 / 0.2),
+        0 32px 80px oklch(15% 0.06 68 / 0.5);
+      overflow: hidden;
+      animation: modal-in 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+      width: 100%;
+    }
+
+    @keyframes modal-in {
+      from { opacity: 0; transform: scale(0.92) translateY(16px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 24px 28px 20px;
+      border-bottom: 1px solid var(--gold-light);
+      background: var(--cream);
+    }
+
+    .modal-eyebrow {
+      font-size: 0.62rem; font-weight: 500; letter-spacing: 0.24em;
+      text-transform: uppercase; color: var(--gold-dark);
+    }
+
+    .modal-close {
+      width: 32px; height: 32px; border-radius: 10px; border: none;
+      background: var(--cream-mid); color: var(--brown-mid);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: background 0.1s ease, color 0.1s ease;
+      font-size: 1.1rem; line-height: 1;
+    }
+    .modal-close:hover { background: var(--cream-deep); color: var(--brown); }
+    .modal-close:focus-visible { outline: 3px solid var(--gold-dark); outline-offset: 2px; }
+
+    /* ─────────────── Quiz Modal ─────────────── */
+    .quiz-panel { max-width: 500px; }
+
+    .quiz-progress {
+      height: 3px; background: var(--gold-light);
+    }
+
+    .quiz-progress-bar {
+      height: 100%; background: var(--gold-dark);
+      transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      width: 0%;
+    }
+
+    .quiz-body { padding: 28px 28px 20px; }
+
+    .quiz-counter {
+      font-size: 0.68rem; font-weight: 500; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--brown-light); margin-bottom: 14px;
+    }
+
+    .quiz-question {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.25rem, 3vw, 1.6rem);
+      font-weight: 400; line-height: 1.35; color: var(--brown);
+      margin-bottom: 24px;
+    }
+
+    .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+
+    .quiz-option {
+      display: flex; align-items: center; gap: 14px;
+      padding: 13px 18px; border-radius: 14px;
+      border: 1.5px solid var(--gold-light);
+      background: white; cursor: pointer; text-align: left;
+      font-family: 'Outfit', system-ui, sans-serif;
+      font-size: 0.9rem; color: var(--brown); line-height: 1.4;
+      transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+    }
+    .quiz-option:hover { border-color: var(--gold); background: oklch(97% 0.016 80); }
+    .quiz-option:active { transform: scale(0.98); }
+
+    .quiz-option .opt-letter {
+      width: 28px; height: 28px; flex-shrink: 0; border-radius: 8px;
+      background: var(--cream-mid); display: flex; align-items: center;
+      justify-content: center; font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.04em; color: var(--brown-mid);
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    /* Answer feedback states */
+    .quiz-option.correct {
+      border-color: var(--correct); background: var(--correct-bg);
+      cursor: default;
+    }
+    .quiz-option.correct .opt-letter { background: var(--correct); color: white; }
+
+    .quiz-option.wrong {
+      border-color: var(--wrong); background: var(--wrong-bg);
+      cursor: default; opacity: 0.8;
+    }
+    .quiz-option.wrong .opt-letter { background: var(--wrong); color: white; }
+
+    .quiz-option.dim { opacity: 0.45; cursor: default; }
+    .quiz-option:disabled { cursor: default; }
+
+    .quiz-feedback {
+      margin-top: 20px; padding: 16px 18px; border-radius: 14px;
+      background: var(--cream-mid); border-left: 3px solid var(--gold);
+      animation: msg-rise 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .feedback-verdict {
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; margin-bottom: 6px;
+    }
+    .feedback-verdict.correct-v { color: var(--correct); }
+    .feedback-verdict.wrong-v   { color: var(--wrong); }
+
+    .feedback-text { font-size: 0.86rem; color: var(--brown-mid); line-height: 1.55; }
+
+    .quiz-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 28px 24px; gap: 16px;
+    }
+
+    .quiz-score-dots { display: flex; gap: 6px; }
+    .score-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--gold-light); transition: background 0.3s ease;
+    }
+    .score-dot.hit  { background: var(--correct); }
+    .score-dot.miss { background: var(--wrong); opacity: 0.5; }
+
+    .quiz-next-btn, .quiz-finish-btn {
+      padding: 10px 20px; border-radius: 12px; border: none;
+      background: var(--gold-dark); color: var(--cream);
+      font-family: 'Outfit', system-ui, sans-serif;
+      font-size: 0.88rem; font-weight: 500; cursor: pointer;
+      transition: background 0.15s ease, transform 0.1s ease;
+      margin-left: auto;
+    }
+    .quiz-next-btn:hover, .quiz-finish-btn:hover { background: var(--brown-mid); }
+    .quiz-next-btn:active, .quiz-finish-btn:active { transform: scale(0.95); }
+
+    /* Final score screen */
+    .quiz-final {
+      padding: 36px 28px;
+      text-align: center;
+      animation: msg-rise 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .final-score-ring {
+      width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 20px;
+      border: 3px solid var(--gold-light);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: white;
+    }
+
+    .final-score-num {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 2.4rem; font-weight: 300; line-height: 1; color: var(--brown);
+    }
+
+    .final-score-label {
+      font-size: 0.6rem; font-weight: 500; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--brown-light);
+    }
+
+    .final-verdict {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.5rem; font-weight: 400; color: var(--brown); margin-bottom: 8px;
+    }
+
+    .final-sub { font-size: 0.86rem; color: var(--brown-light); margin-bottom: 24px; }
+
+    .quiz-again-btn {
+      padding: 12px 28px; border-radius: 14px; border: none;
+      background: var(--gold-dark); color: var(--cream);
+      font-family: 'Outfit', system-ui, sans-serif;
+      font-size: 0.9rem; font-weight: 500; cursor: pointer;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+    .quiz-again-btn:hover { background: var(--brown-mid); }
+
+    /* ─────────────── Selfie Modal ─────────────── */
+    .selfie-panel { max-width: 480px; }
+
+    .selfie-body { padding: 20px 24px 16px; }
+
+    .selfie-viewport {
+      position: relative; border-radius: 18px; overflow: hidden;
+      background: oklch(20% 0.03 68); aspect-ratio: 4/3;
+    }
+
+    #selfie-video, #selfie-canvas {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+
+    #selfie-video { transform: scaleX(-1); }
+
+    .selfie-countdown {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: oklch(15% 0.04 68 / 0.5);
+    }
+
+    .countdown-num {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 8rem; font-weight: 300; color: white;
+      text-shadow: 0 4px 24px oklch(0% 0 0 / 0.5);
+      animation: countdown-pop 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes countdown-pop {
+      from { opacity: 0; transform: scale(1.6); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .selfie-camera-error {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 100%; gap: 12px; padding: 24px; text-align: center;
+    }
+    .selfie-camera-error-icon { font-size: 2.5rem; opacity: 0.5; }
+    .selfie-camera-error-text { font-size: 0.88rem; color: oklch(80% 0.02 80); line-height: 1.5; }
+
+    .selfie-caption {
+      font-size: 0.78rem; color: var(--brown-light); text-align: center;
+      margin-top: 12px; font-style: italic; min-height: 1.2em;
+      transition: opacity 0.2s ease;
+    }
+
+    .selfie-footer {
+      display: flex; gap: 10px; align-items: center; justify-content: center;
+      padding: 14px 24px 24px;
+    }
+
+    .selfie-capture-btn {
+      flex: 1; padding: 13px 20px; border-radius: 14px; border: none;
+      background: var(--gold-dark); color: var(--cream);
+      font-family: 'Outfit', system-ui, sans-serif;
+      font-size: 0.95rem; font-weight: 600; cursor: pointer;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+    .selfie-capture-btn:hover { background: var(--brown-mid); }
+    .selfie-capture-btn:active { transform: scale(0.97); }
+    .selfie-capture-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .selfie-secondary-btn {
+      padding: 13px 18px; border-radius: 14px; border: 1.5px solid var(--gold-light);
+      background: white; color: var(--brown-mid);
+      font-family: 'Outfit', system-ui, sans-serif;
+      font-size: 0.88rem; font-weight: 500; cursor: pointer;
+      transition: border-color 0.15s ease, color 0.15s ease;
+    }
+    .selfie-secondary-btn:hover { border-color: var(--gold); color: var(--brown); }
+
+    /* ─────────────── Mobile ─────────────── */
+    @media (max-width: 520px) {
+      body { padding: 0; }
+      #chat-container { border-radius: 0; height: 100dvh; max-width: 100%; }
+      #chat-messages  { padding: 20px; }
+      #chat-header    { padding: 22px 24px 18px; }
+      #chat-input-row { padding: 12px 16px 18px; }
+      .modal-overlay  { padding: 12px; }
+    }
+
+    /* ─────────────── Reduced motion ─────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+      #chat-messages { scroll-behavior: auto; }
+      #send-btn:active { transform: none; }
+    }
   </style>
-  <script
-          src="https://cdn.jsdelivr.net/gh/logspace-ai/langflow-embedded-chat@v1.0.7/dist/build/static/js/bundle.min.js">
-  </script>
-  <langflow-chat
-          flow_id="92437b9a-a039-4e98-a686-81f017abb5b5"
-          host_url="http://localhost:7868"
-          start_open="true"
-          chat_window_style='{
-            "backgroundColor": "#F8E16C",
-            "borderRadius": "19px",
-            "fontFamily": "Georgia, serif",
-            "padding": "16px"
-          }'
-          window_title="Cheese Master"
-          height=400"
-          width="600"
-          placeholder="enter cheese prompt">
-  </langflow-chat>
 </head>
 <body>
-<script type="module" src="js/index.js"></script>
+
+  <!-- ── Chat Panel ── -->
+  <div id="chat-container">
+
+    <header id="chat-header">
+      <p class="header-eyebrow">The Cheese Salon</p>
+      <h1 class="header-title">Cheese <em>Master</em></h1>
+      <div class="header-ornament"><div class="ornament-gem"></div></div>
+    </header>
+
+    <div id="chat-messages" role="log" aria-live="polite" aria-label="Chat messages">
+      <div class="msg-wrapper bot">
+        <span class="msg-sender">Cheese Master</span>
+        <div class="msg bot">Bonjour! I'm your Cheese Master — ask me anything about the world of cheese. Type <strong>/</strong> to explore what I can do for you.</div>
+      </div>
+    </div>
+
+    <div id="palette-wrapper" role="listbox" aria-label="Available commands" aria-hidden="true">
+      <div id="command-palette">
+        <div class="palette-inner">
+          <p class="palette-label">Commands</p>
+          <ul class="palette-list" id="command-list"></ul>
+        </div>
+      </div>
+    </div>
+
+    <div id="chat-input-row">
+      <label for="chat-input" class="visually-hidden">Ask the Cheese Master</label>
+      <input
+        id="chat-input" type="text"
+        placeholder="Which cheese has you curious?  (try typing /)"
+        autocomplete="off" aria-label="Ask the Cheese Master"
+        aria-autocomplete="list" aria-controls="command-list"
+      />
+      <button id="send-btn" type="button" aria-label="Send message">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 19V5"/><path d="M5 12l7-7 7 7"/>
+        </svg>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ── Quiz Modal ── -->
+  <div id="quiz-modal" class="modal-overlay" hidden
+       role="dialog" aria-modal="true" aria-labelledby="quiz-question-text">
+    <div class="modal-backdrop" id="quiz-backdrop"></div>
+    <div class="modal-panel quiz-panel">
+      <div class="modal-header">
+        <span class="modal-eyebrow">Cheese Trivia</span>
+        <button class="modal-close" id="quiz-close" aria-label="Close quiz">✕</button>
+      </div>
+      <div class="quiz-progress"><div class="quiz-progress-bar" id="quiz-progress-bar"></div></div>
+      <div class="quiz-body" id="quiz-body">
+        <p class="quiz-counter" id="quiz-counter">Question 1 of 5</p>
+        <h2 class="quiz-question" id="quiz-question-text"></h2>
+        <div class="quiz-options" id="quiz-options"></div>
+        <div class="quiz-feedback" id="quiz-feedback" hidden>
+          <p class="feedback-verdict" id="feedback-verdict"></p>
+          <p class="feedback-text"   id="feedback-text"></p>
+        </div>
+      </div>
+      <div class="quiz-footer" id="quiz-footer">
+        <div class="quiz-score-dots" id="quiz-score-dots"></div>
+        <button class="quiz-next-btn" id="quiz-next" hidden>Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Selfie Modal ── -->
+  <div id="selfie-modal" class="modal-overlay" hidden
+       role="dialog" aria-modal="true" aria-label="Cheese selfie camera">
+    <div class="modal-backdrop" id="selfie-backdrop"></div>
+    <div class="modal-panel selfie-panel">
+      <div class="modal-header">
+        <span class="modal-eyebrow" id="selfie-eyebrow">Cheese Me</span>
+        <button class="modal-close" id="selfie-close" aria-label="Close camera">✕</button>
+      </div>
+      <div class="selfie-body">
+        <div class="selfie-viewport" id="selfie-viewport">
+          <video id="selfie-video" autoplay playsinline muted></video>
+          <canvas id="selfie-canvas" hidden></canvas>
+          <div class="selfie-countdown" id="selfie-countdown" hidden>
+            <span class="countdown-num" id="countdown-num"></span>
+          </div>
+        </div>
+        <p class="selfie-caption" id="selfie-caption">Center your face in the frame</p>
+      </div>
+      <div class="selfie-footer">
+        <button class="selfie-secondary-btn" id="selfie-retake" hidden>↩ Retake</button>
+        <button class="selfie-capture-btn"   id="selfie-capture">🧀 Cheese Me!</button>
+        <button class="selfie-secondary-btn" id="selfie-download" hidden>↓ Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/index.js"></script>
+  <script>
+    // Local dev → localhost. Deployed → your Render URL (replace below after deploying)
+    const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? "http://localhost:8000/chat"
+      : "https://YOUR-RENDER-APP-NAME.onrender.com/chat";
+
+    // ── Quiz questions ──────────────────────────────────────────────────────
+    const QUIZ_QUESTIONS = [
+      {
+        q: "Which country is the exclusive producer of authentic Parmigiano-Reggiano?",
+        options: ["France", "Switzerland", "Italy", "Spain"],
+        answer: 2,
+        fact: "Parmigiano-Reggiano has PDO status and can only be produced in specific provinces of northern Italy: Parma, Reggio Emilia, Modena, and parts of Bologna and Mantua.",
+      },
+      {
+        q: "What living organism gives Roquefort its distinctive blue-green veins?",
+        options: ["A cave bacteria", "Natural mineral deposits", "Penicillium roqueforti mold", "Blue algae from the caves"],
+        answer: 2,
+        fact: "Penicillium roqueforti is introduced into the cheese, then long needles are used to create air channels so the mold can breathe and develop throughout the wheel.",
+      },
+      {
+        q: "Traditional mozzarella di bufala is made from the milk of which animal?",
+        options: ["Cow", "Goat", "Sheep", "Water buffalo"],
+        answer: 3,
+        fact: "Authentic mozzarella di bufala uses Italian water buffalo milk, giving it a richer flavor and creamier texture than cow's milk mozzarella. The bufala herd in Italy numbers over 300,000.",
+      },
+      {
+        q: "What does 'affinage' refer to in cheesemaking?",
+        options: ["The salting of curds", "Aging and maturing of cheese", "Adding mold cultures to milk", "The pressing of the wheel"],
+        answer: 1,
+        fact: "An 'affineur' tends to cheeses as they mature — washing rinds, flipping wheels, managing cave humidity. It's a specialized craft entirely separate from the initial cheesemaking.",
+      },
+      {
+        q: "What is the creamy, stranded filling inside a burrata called?",
+        options: ["Ricotta", "Mascarpone", "Stracciatella", "Panna cotta"],
+        answer: 2,
+        fact: "Stracciatella (from 'stracciare', 'to tear') is shredded mozzarella mixed with fresh cream. It's also sold on its own and is what makes burrata so irresistibly rich.",
+      },
+      {
+        q: "Manchego cheese must be made from the milk of which breed of sheep?",
+        options: ["Merino", "Manchega", "Churra", "Latxa"],
+        answer: 1,
+        fact: "PDO Manchego requires milk exclusively from Manchega sheep, native to the La Mancha plateau of Spain — the same landscape famously roamed by Don Quixote.",
+      },
+      {
+        q: "What does 'PDO' mean on a European cheese label?",
+        options: ["Premium Dairy Origin", "Protected Designation of Origin", "Pure Dairy Organisation", "Product of Denominazione and Origin"],
+        answer: 1,
+        fact: "PDO (Protected Designation of Origin) guarantees the cheese was produced, processed, and prepared in a specific geographic region using recognized, traditional methods.",
+      },
+      {
+        q: "Cheddar cheese takes its name from a village in which English county?",
+        options: ["Devon", "Yorkshire", "Wiltshire", "Somerset"],
+        answer: 3,
+        fact: "Cheddar village in Somerset is home to the Cheddar Gorge caves, which provided near-perfect temperature and humidity for aging. Some of the oldest cheese artifacts in Britain were found there.",
+      },
+      {
+        q: "What is the 'pasta filata' technique used to make?",
+        options: ["Hard aged cheeses like Comté", "Stretched curd cheeses like mozzarella", "Blue-veined cheeses like Gorgonzola", "Washed-rind cheeses like Époisses"],
+        answer: 1,
+        fact: "'Pasta filata' (spun paste) is the stretching and kneading of hot curds in hot water. It gives mozzarella, provolone, scamorza, and caciocavallo their signature elastic texture.",
+      },
+      {
+        q: "Which French cheese is famous for being washed in Marc de Bourgogne brandy?",
+        options: ["Camembert", "Époisses", "Comté", "Reblochon"],
+        answer: 1,
+        fact: "Époisses de Bourgogne is washed repeatedly with Marc de Bourgogne during aging, creating its pungent orange rind. Napoléon reportedly called it the 'king of all cheeses.'",
+      },
+      {
+        q: "Which country consumes the most cheese per capita in the world?",
+        options: ["France", "Greece", "Denmark", "Iceland"],
+        answer: 1,
+        fact: "Greece leads global cheese consumption per person, largely due to feta — consumed at an average of about 23kg per person per year. France, often assumed the winner, comes in around 27kg but has a higher population.",
+      },
+      {
+        q: "What characteristic makes Emmental (Swiss cheese) have its famous holes?",
+        options: ["Air trapped during pressing", "CO₂ produced by Propionibacterium bacteria", "Water evaporating during aging", "The cheese being pierced for brine"],
+        answer: 1,
+        fact: "Propionibacterium freudenreichii bacteria consume lactic acid and release CO₂ gas during aging. The trapped bubbles create Emmental's iconic holes, called 'eyes.' Larger eyes = warmer aging cave.",
+      },
+    ];
+
+    // ── Commands ────────────────────────────────────────────────────────────
+    const COMMANDS = [
+      {
+        cmd: '/quiz', icon: '◇', label: 'Quiz Me',
+        desc: 'Test your cheese knowledge with 5 questions',
+        type: 'local', fn: openQuiz,
+      },
+      {
+        cmd: '/cheeseme', icon: '📸', label: 'Cheese Me',
+        desc: 'Take a selfie & get cheese on your head',
+        type: 'local', fn: openSelfie,
+      },
+      {
+        cmd: '/cheddar', icon: '🟠', label: 'Go Cheddar',
+        desc: 'Watch cheddar drip down and consume the world',
+        type: 'local', fn: openCheddar,
+      },
+      {
+        cmd: '/fact', icon: '◈', label: 'Random Fact',
+        desc: 'Get a surprising cheese fact',
+        type: 'immediate',
+        prompt: 'Share a surprising, delightful, or little-known fact about cheese — something that would make a cheese lover say "I never knew that!"',
+      },
+      {
+        cmd: '/pair', icon: '⊕', label: 'Pairings',
+        desc: 'Food & wine pairings for any cheese',
+        type: 'template', arg: 'cheese name',
+        promptFn: (a) => `What foods, wines, and drinks pair best with ${a}? Give 4–5 specific pairings with a brief explanation of why each works.`,
+      },
+      {
+        cmd: '/describe', icon: '◉', label: 'Tasting Notes',
+        desc: 'Evocative sensory description of a cheese',
+        type: 'template', arg: 'cheese name',
+        promptFn: (a) => `Give me rich, evocative tasting notes for ${a} — its texture, rind, aroma, and flavor profile. Make it vivid.`,
+      },
+      {
+        cmd: '/origin', icon: '◎', label: 'Origin Story',
+        desc: 'History & provenance of a cheese',
+        type: 'template', arg: 'cheese name',
+        promptFn: (a) => `Tell me about the origin, history, and cultural significance of ${a}. Where does it come from and why does it matter?`,
+      },
+      {
+        cmd: '/substitute', icon: '⇌', label: 'Find a Sub',
+        desc: 'Best alternatives when you\'re out of a cheese',
+        type: 'template', arg: 'cheese name',
+        promptFn: (a) => `What are the best substitutes for ${a}? For each, explain when it works as a replacement and when it falls short.`,
+      },
+      {
+        cmd: '/board', icon: '◆', label: 'Cheese Board',
+        desc: 'A curated cheese board built just for now',
+        type: 'immediate',
+        prompt: 'Suggest a beautifully curated cheese board: 4–5 cheeses, the right accompaniments, presentation tips, and the rationale behind your choices.',
+      },
+      {
+        cmd: '/season', icon: '◌', label: 'In Season',
+        desc: 'What\'s at peak right now',
+        type: 'immediate',
+        prompt: 'What cheeses are at their absolute peak right now? Give me 3–4 seasonal picks with tasting notes and serving suggestions.',
+      },
+    ];
+
+    // ── DOM refs ────────────────────────────────────────────────────────────
+    const messagesEl     = document.getElementById('chat-messages');
+    const inputEl        = document.getElementById('chat-input');
+    const sendBtn        = document.getElementById('send-btn');
+    const paletteWrapper = document.getElementById('palette-wrapper');
+    const commandList    = document.getElementById('command-list');
+
+    // ── Palette state ────────────────────────────────────────────────────────
+    let paletteOpen  = false;
+    let activeIndex  = 0;
+    let filteredCmds = [];
+
+    function openPalette(filter = '') {
+      filteredCmds = filter
+        ? COMMANDS.filter(c => c.cmd.includes(filter) || c.label.toLowerCase().includes(filter))
+        : COMMANDS;
+      renderCommandList();
+      if (!paletteOpen) {
+        paletteOpen = true;
+        paletteWrapper.classList.add('open');
+        paletteWrapper.setAttribute('aria-hidden', 'false');
+        inputEl.classList.add('slash-mode');
+      }
+      activeIndex = 0;
+      updateActive();
+    }
+
+    function closePalette() {
+      if (!paletteOpen) return;
+      paletteOpen = false;
+      paletteWrapper.classList.remove('open');
+      paletteWrapper.setAttribute('aria-hidden', 'true');
+      inputEl.classList.remove('slash-mode');
+    }
+
+    function renderCommandList() {
+      commandList.innerHTML = '';
+      if (!filteredCmds.length) {
+        const e = document.createElement('li');
+        e.className = 'palette-empty';
+        e.textContent = 'No commands match.';
+        commandList.appendChild(e);
+        return;
+      }
+      filteredCmds.forEach((cmd, i) => {
+        const li  = document.createElement('li');
+        li.setAttribute('role', 'option');
+        const btn = document.createElement('button');
+        btn.className = 'command-item';
+        btn.type = 'button';
+        btn.dataset.index = i;
+        btn.innerHTML = `
+          <span class="cmd-icon" aria-hidden="true">${cmd.icon}</span>
+          <span class="cmd-body">
+            <span class="cmd-name">${cmd.cmd}</span>
+            <span class="cmd-desc">${cmd.desc}</span>
+          </span>
+          ${cmd.type === 'template' ? `<span class="cmd-arg-hint">${cmd.arg}</span>` : ''}
+        `;
+        btn.addEventListener('click', () => selectCommand(cmd));
+        li.appendChild(btn);
+        commandList.appendChild(li);
+      });
+    }
+
+    function updateActive() {
+      commandList.querySelectorAll('.command-item').forEach((btn, i) => {
+        btn.classList.toggle('active', i === activeIndex);
+        if (i === activeIndex) btn.scrollIntoView({ block: 'nearest' });
+      });
+    }
+
+    function selectCommand(cmd) {
+      closePalette();
+      if (cmd.type === 'local') {
+        inputEl.value = '';
+        cmd.fn();
+      } else if (cmd.type === 'immediate') {
+        inputEl.value = '';
+        dispatchCommand(cmd.cmd, cmd.prompt);
+      } else {
+        inputEl.value = cmd.cmd + ' ';
+        inputEl.focus();
+      }
+    }
+
+    // ── Message helpers ──────────────────────────────────────────────────────
+    function addMessage(text, role, isCommand = false) {
+      const isTyping = role === 'bot typing';
+      const baseRole = isTyping ? 'bot' : role;
+      const wrapper  = document.createElement('div');
+      wrapper.className = `msg-wrapper ${baseRole}`;
+      const sender = document.createElement('span');
+      sender.className = 'msg-sender';
+      sender.textContent = baseRole === 'user' ? 'You' : 'Cheese Master';
+      const bubble = document.createElement('div');
+      bubble.className = `msg ${baseRole}${isTyping ? ' typing' : ''}${isCommand ? ' is-command' : ''}`;
+      if (isTyping) {
+        bubble.appendChild(document.createTextNode(text));
+        const dots = document.createElement('span');
+        dots.className = 'typing-dots';
+        dots.innerHTML = '<span></span><span></span><span></span>';
+        bubble.appendChild(dots);
+      } else {
+        bubble.textContent = text;
+      }
+      wrapper.appendChild(sender);
+      wrapper.appendChild(bubble);
+      messagesEl.appendChild(wrapper);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      return bubble;
+    }
+
+    async function fetchReply(prompt) {
+      sendBtn.disabled = true;
+      const typingEl = addMessage('Cheesing', 'bot typing');
+      try {
+        const res  = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: prompt }) });
+        const data = await res.json();
+        typingEl.textContent = data.reply || data.detail || 'Something went wrong.';
+        typingEl.classList.remove('typing');
+      } catch {
+        typingEl.className = 'msg error';
+        typingEl.textContent = 'Could not reach the backend. Is it running?';
+      } finally {
+        sendBtn.disabled = false;
+        inputEl.focus();
+      }
+    }
+
+    async function dispatchCommand(display, prompt) {
+      addMessage(display, 'user', true);
+      await fetchReply(prompt);
+    }
+
+    function resolveSlashCommand(raw) {
+      const match = raw.match(/^\/(\w+)(?:\s+(.+))?$/);
+      if (!match) return null;
+      const [, name, arg] = match;
+      const cmd = COMMANDS.find(c => c.cmd === `/${name}`);
+      if (!cmd) return null;
+      if (cmd.type === 'local') return { local: true, fn: cmd.fn };
+      if (cmd.type === 'immediate') return { display: cmd.cmd, prompt: cmd.prompt };
+      if (!arg) return null;
+      return { display: raw, prompt: cmd.promptFn(arg.trim()) };
+    }
+
+    async function sendMessage() {
+      const raw = inputEl.value.trim();
+      if (!raw) return;
+      closePalette();
+      inputEl.value = '';
+      if (raw.startsWith('/')) {
+        const resolved = resolveSlashCommand(raw);
+        if (!resolved) {
+          addMessage(raw, 'user', true);
+          addMessage('Unknown or incomplete command. Type / to see what\'s available.', 'bot');
+          return;
+        }
+        if (resolved.local) { resolved.fn(); return; }
+        await dispatchCommand(resolved.display, resolved.prompt);
+      } else {
+        addMessage(raw, 'user');
+        await fetchReply(raw);
+      }
+    }
+
+    inputEl.addEventListener('input', () => {
+      const val = inputEl.value;
+      if (val.startsWith('/')) openPalette(val.slice(1).toLowerCase());
+      else closePalette();
+    });
+
+    inputEl.addEventListener('keydown', (e) => {
+      if (paletteOpen) {
+        if (e.key === 'ArrowDown')  { e.preventDefault(); activeIndex = (activeIndex + 1) % filteredCmds.length; updateActive(); return; }
+        if (e.key === 'ArrowUp')    { e.preventDefault(); activeIndex = (activeIndex - 1 + filteredCmds.length) % filteredCmds.length; updateActive(); return; }
+        if (e.key === 'Enter')      { e.preventDefault(); if (filteredCmds[activeIndex]) selectCommand(filteredCmds[activeIndex]); return; }
+        if (e.key === 'Escape')     { e.preventDefault(); closePalette(); return; }
+      }
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (paletteOpen && !e.target.closest('#palette-wrapper') && !e.target.closest('#chat-input')) closePalette();
+    });
+
+    sendBtn.addEventListener('click', sendMessage);
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // ── QUIZ ENGINE ────────────────────────────────────────────────────────
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    const QUIZ_LENGTH = 5;
+    const quizModal   = document.getElementById('quiz-modal');
+    const quizBody    = document.getElementById('quiz-body');
+    const quizFooter  = document.getElementById('quiz-footer');
+    const quizProgress= document.getElementById('quiz-progress-bar');
+    const quizCounter = document.getElementById('quiz-counter');
+    const quizQText   = document.getElementById('quiz-question-text');
+    const quizOptions = document.getElementById('quiz-options');
+    const quizFeedback= document.getElementById('quiz-feedback');
+    const feedVerdict = document.getElementById('feedback-verdict');
+    const feedText    = document.getElementById('feedback-text');
+    const quizDots    = document.getElementById('quiz-score-dots');
+    const quizNext    = document.getElementById('quiz-next');
+
+    let quizQueue   = [];
+    let quizIndex   = 0;
+    let quizScore   = 0;
+    let quizResults = []; // true/false per question
+
+    function openQuiz() {
+      // Shuffle and pick QUIZ_LENGTH questions
+      quizQueue = [...QUIZ_QUESTIONS].sort(() => Math.random() - 0.5).slice(0, QUIZ_LENGTH);
+      quizIndex   = 0;
+      quizScore   = 0;
+      quizResults = [];
+      quizModal.hidden = false;
+      loadQuizQuestion();
+    }
+
+    function closeQuiz() {
+      quizModal.hidden = true;
+    }
+
+    function loadQuizQuestion() {
+      const q    = quizQueue[quizIndex];
+      const num  = quizIndex + 1;
+      const pct  = ((quizIndex) / QUIZ_LENGTH) * 100;
+
+      quizProgress.style.width = `${pct}%`;
+      quizCounter.textContent  = `Question ${num} of ${QUIZ_LENGTH}`;
+      quizQText.textContent    = q.q;
+      quizFeedback.hidden      = true;
+      quizNext.hidden          = true;
+
+      // Score dots
+      quizDots.innerHTML = '';
+      for (let i = 0; i < QUIZ_LENGTH; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'score-dot';
+        if (i < quizResults.length) dot.classList.add(quizResults[i] ? 'hit' : 'miss');
+        quizDots.appendChild(dot);
+      }
+
+      // Build option buttons
+      quizOptions.innerHTML = '';
+      const letters = ['A', 'B', 'C', 'D'];
+      q.options.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'quiz-option';
+        btn.type = 'button';
+        btn.innerHTML = `<span class="opt-letter">${letters[i]}</span><span>${opt}</span>`;
+        btn.addEventListener('click', () => answerQuiz(i));
+        quizOptions.appendChild(btn);
+      });
+    }
+
+    function answerQuiz(chosen) {
+      const q       = quizQueue[quizIndex];
+      const correct = chosen === q.answer;
+      quizScore  += correct ? 1 : 0;
+      quizResults.push(correct);
+
+      // Lock all options, apply feedback styles
+      const btns = quizOptions.querySelectorAll('.quiz-option');
+      btns.forEach((btn, i) => {
+        btn.disabled = true;
+        if (i === q.answer) btn.classList.add('correct');
+        else if (i === chosen && !correct) btn.classList.add('wrong');
+        else btn.classList.add('dim');
+      });
+
+      // Update dot
+      const dots = quizDots.querySelectorAll('.score-dot');
+      if (dots[quizIndex]) dots[quizIndex].classList.add(correct ? 'hit' : 'miss');
+
+      // Show feedback
+      feedVerdict.textContent  = correct ? '✓ Correct!' : '✗ Not quite';
+      feedVerdict.className    = `feedback-verdict ${correct ? 'correct-v' : 'wrong-v'}`;
+      feedText.textContent     = q.fact;
+      quizFeedback.hidden      = false;
+
+      // Show Next or Finish
+      quizNext.textContent = (quizIndex === QUIZ_LENGTH - 1) ? 'See results →' : 'Next →';
+      quizNext.hidden = false;
+    }
+
+    quizNext.addEventListener('click', () => {
+      quizIndex++;
+      if (quizIndex >= QUIZ_LENGTH) showQuizFinal();
+      else loadQuizQuestion();
+    });
+
+    function showQuizFinal() {
+      quizProgress.style.width = '100%';
+      const verdicts = [
+        ['An aged master!', 'Your cheese knowledge is truly extraordinary.'],
+        ['Impressively gouda!', 'You clearly have exquisite taste in fromage.'],
+        ['Well-aged palate!', 'A few more ripening sessions and you\'ll be perfect.'],
+        ['Still maturing…', 'Every great cheese takes time. Keep learning!'],
+        ['Fresh out of the vat!', 'Even the finest cheeses needed time to develop.'],
+      ];
+      const v = quizScore === 5 ? 0 : quizScore >= 4 ? 1 : quizScore >= 3 ? 2 : quizScore >= 2 ? 3 : 4;
+
+      quizBody.innerHTML = `
+        <div class="quiz-final">
+          <div class="final-score-ring">
+            <span class="final-score-num">${quizScore}/${QUIZ_LENGTH}</span>
+            <span class="final-score-label">correct</span>
+          </div>
+          <p class="final-verdict">${verdicts[v][0]}</p>
+          <p class="final-sub">${verdicts[v][1]}</p>
+          <button class="quiz-again-btn" id="quiz-again">Play again</button>
+        </div>
+      `;
+      quizFooter.innerHTML = '';
+
+      document.getElementById('quiz-again').addEventListener('click', openQuiz);
+    }
+
+    document.getElementById('quiz-close').addEventListener('click', closeQuiz);
+    document.getElementById('quiz-backdrop').addEventListener('click', closeQuiz);
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // ── SELFIE / CHEESEME ENGINE ────────────────────────────────────────────
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    const selfieModal    = document.getElementById('selfie-modal');
+    const selfieViewport = document.getElementById('selfie-viewport');
+    const selfieVideo    = document.getElementById('selfie-video');
+    const selfieCanvas   = document.getElementById('selfie-canvas');
+    const selfieCountdown= document.getElementById('selfie-countdown');
+    const countdownNum   = document.getElementById('countdown-num');
+    const selfieCapture  = document.getElementById('selfie-capture');
+    const selfieRetake   = document.getElementById('selfie-retake');
+    const selfieDownload = document.getElementById('selfie-download');
+    const selfieEyebrow  = document.getElementById('selfie-eyebrow');
+    const selfieCaption  = document.getElementById('selfie-caption');
+
+    let cameraStream = null;
+
+    const SELFIE_CAPTIONS = [
+      'Looking absolutely gouda!',
+      'Nacho average selfie!',
+      'You\'re looking extra sharp today!',
+      'Feta-stic shot!',
+      'Say fromage!',
+      'You\'ve got great taste — literally.',
+    ];
+
+    async function openSelfie() {
+      selfieModal.hidden = false;
+      selfieEyebrow.textContent = 'Cheese Me';
+      selfieCaption.textContent = 'Center your face in the frame';
+
+      // Reset UI
+      selfieVideo.hidden  = false;
+      selfieCanvas.hidden = true;
+      selfieCountdown.hidden = true;
+      selfieCapture.hidden  = false;
+      selfieCapture.disabled = false;
+      selfieCapture.textContent = '🧀 Cheese Me!';
+      selfieRetake.hidden  = true;
+      selfieDownload.hidden = true;
+
+      try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+        });
+        selfieVideo.srcObject = cameraStream;
+        await selfieVideo.play();
+      } catch (err) {
+        // getUserMedia throws on denial; play() can throw AbortError if stream ended — ignore that
+        if (err.name === 'AbortError') return;
+        selfieViewport.innerHTML = `
+          <div class="selfie-camera-error">
+            <span class="selfie-camera-error-icon">📵</span>
+            <p class="selfie-camera-error-text">Camera access was denied or isn't available.<br>Please allow camera permissions and try again.</p>
+          </div>`;
+        selfieCapture.disabled = true;
+      }
+    }
+
+    function closeSelfie() {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(t => t.stop());
+        cameraStream = null;
+      }
+      selfieModal.hidden = true;
+      // Restore the video element (in case the viewport was replaced)
+      selfieViewport.innerHTML = '';
+      selfieViewport.appendChild(selfieVideo);
+      selfieViewport.appendChild(selfieCanvas);
+      selfieViewport.appendChild(selfieCountdown);
+      selfieVideo.srcObject = null;
+    }
+
+    async function startCountdown() {
+      selfieCapture.disabled = true;
+      selfieCountdown.hidden = false;
+
+      for (let i = 3; i >= 1; i--) {
+        countdownNum.textContent = i;
+        // Restart the CSS animation without touching the DOM
+        countdownNum.style.animation = 'none';
+        countdownNum.offsetHeight; // force reflow so the browser notices the reset
+        countdownNum.style.animation = 'countdown-pop 0.85s cubic-bezier(0.16, 1, 0.3, 1) both';
+        await sleep(900);
+      }
+
+      selfieCountdown.hidden = true;
+      takeSelfie();
+    }
+
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    function takeSelfie() {
+      const W = selfieVideo.videoWidth  || 640;
+      const H = selfieVideo.videoHeight || 480;
+      selfieCanvas.width  = W;
+      selfieCanvas.height = H;
+
+      const ctx = selfieCanvas.getContext('2d');
+
+      // Mirror to match the mirrored video preview
+      ctx.translate(W, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(selfieVideo, 0, 0, W, H);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+      // Stop camera
+      if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
+
+      // Pick a cheese PNG (transparent background preferred)
+      const pool = (window.CHEESE_PNGS && window.CHEESE_PNGS.length > 0)
+        ? window.CHEESE_PNGS
+        : ['./src/cheese/cheese_PNG10-3878731391.png'];
+      const cheeseSrc = pool[Math.floor(Math.random() * pool.length)];
+
+      const cheeseImg = new Image();
+      cheeseImg.onload = () => {
+        const cheeseW = W * 0.55;
+        const cheeseH = (cheeseImg.naturalHeight / cheeseImg.naturalWidth) * cheeseW;
+        const cx = (W - cheeseW) / 2;
+        const cy = -cheeseH * 0.28; // sit just on top of the head
+        const angle = (Math.random() - 0.5) * 0.22;
+
+        ctx.save();
+        ctx.translate(cx + cheeseW / 2, cy + cheeseH / 2);
+        ctx.rotate(angle);
+        ctx.drawImage(cheeseImg, -cheeseW / 2, -cheeseH / 2, cheeseW, cheeseH);
+        ctx.restore();
+
+        showSelfieResult();
+      };
+      cheeseImg.onerror = () => showSelfieResult(); // show photo even if cheese fails
+      cheeseImg.src = cheeseSrc;
+    }
+
+    function showSelfieResult() {
+      selfieVideo.hidden  = true;
+      selfieCanvas.hidden = false;
+
+      selfieEyebrow.textContent = 'Looking gouda!';
+      selfieCaption.textContent = SELFIE_CAPTIONS[Math.floor(Math.random() * SELFIE_CAPTIONS.length)];
+
+      selfieCapture.hidden  = true;
+      selfieRetake.hidden   = false;
+      selfieDownload.hidden = false;
+    }
+
+    selfieCapture.addEventListener('click', startCountdown);
+
+    selfieRetake.addEventListener('click', () => {
+      // Re-open camera
+      selfieVideo.hidden  = false;
+      selfieCanvas.hidden = true;
+      selfieEyebrow.textContent = 'Cheese Me';
+      selfieCaption.textContent = 'Center your face in the frame';
+      selfieCapture.hidden  = false;
+      selfieCapture.disabled = false;
+      selfieRetake.hidden   = true;
+      selfieDownload.hidden = true;
+
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } }).then(stream => {
+        cameraStream = stream;
+        selfieVideo.srcObject = stream;
+        selfieVideo.play().catch(() => {});
+      });
+    });
+
+    selfieDownload.addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.download = 'cheese-selfie.png';
+      link.href = selfieCanvas.toDataURL('image/png');
+      link.click();
+    });
+
+    document.getElementById('selfie-close').addEventListener('click', closeSelfie);
+    document.getElementById('selfie-backdrop').addEventListener('click', closeSelfie);
+
+    // Close modals on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (!quizModal.hidden)  closeQuiz();
+        if (!selfieModal.hidden) closeSelfie();
+        const co = document.getElementById('cheddar-overlay');
+        if (co) co._dismiss();
+      }
+    });
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // ── CHEDDAR DRIP ENGINE ─────────────────────────────────────────────────
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    const CHEDDAR_PALETTE = [
+      '#f4921e', '#e8800e', '#ffaa32', '#d97010',
+      '#f5a030', '#de7808', '#fbb040', '#c86808',
+    ];
+
+    function cheddarShade(hex, amt) {
+      const n = parseInt(hex.slice(1), 16);
+      const r = Math.min(255, Math.max(0, (n >> 16)       + amt));
+      const g = Math.min(255, Math.max(0, ((n >> 8) & 0xff) + amt));
+      const b = Math.min(255, Math.max(0, (n & 0xff)       + amt));
+      return `rgb(${r},${g},${b})`;
+    }
+
+    function buildCheddarDrips(W, H) {
+      const drips = [];
+      let x = 0;
+      while (x < W + 30) {
+        const w     = 50 + Math.random() * 80;
+        const col   = CHEDDAR_PALETTE[Math.floor(Math.random() * CHEDDAR_PALETTE.length)];
+        const speed = 2.2 + Math.random() * 3.4; // px per frame (~60fps)
+        drips.push({
+          x:     x - 10,        // slight overlap to kill hairline gaps
+          w:     w + 20,
+          y:     0,             // current tip position (grows downward)
+          speed,
+          delay: Math.random() * 1400,  // stagger start (ms)
+          color: col,
+          r:     (w + 20) * 0.62, // drip-head radius
+          done:  false,
+        });
+        x += w;
+      }
+      return drips;
+    }
+
+    function drawCheddarDrip(ctx, { x, w, y, color, r }, H) {
+      if (y <= 0) return;
+      const tip = Math.min(y, H + r);
+
+      // Horizontal 3-stop gradient gives each drip a rounded, 3-D look
+      const g = ctx.createLinearGradient(x, 0, x + w, 0);
+      g.addColorStop(0,    cheddarShade(color, -30));
+      g.addColorStop(0.25, cheddarShade(color, +18));
+      g.addColorStop(0.55, cheddarShade(color, +32));
+      g.addColorStop(0.8,  cheddarShade(color, +10));
+      g.addColorStop(1,    cheddarShade(color, -30));
+
+      // Drip shape: rectangular body + bezier blob at the bottom
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x + w, 0);
+      ctx.lineTo(x + w, Math.max(0, tip - r * 0.45));
+      ctx.bezierCurveTo(                      // right shoulder → right of blob
+        x + w + r * 0.55, tip + r * 0.05,
+        x + w + r * 0.45, tip + r * 0.65,
+        x + w / 2,         tip + r * 0.58
+      );
+      ctx.bezierCurveTo(                      // left of blob → left shoulder
+        x - r * 0.45,      tip + r * 0.65,
+        x - r * 0.55,      tip + r * 0.05,
+        x,                 Math.max(0, tip - r * 0.45)
+      );
+      ctx.closePath();
+      ctx.fillStyle = g;
+      ctx.fill();
+
+      // Specular highlight on the drip head — makes it look glossy and liquid
+      if (y < H + r * 0.5) {
+        const hx = x + w * 0.33;
+        const hy = tip + r * 0.05;
+        const hg = ctx.createRadialGradient(hx, hy, 0, hx, hy, r * 0.48);
+        hg.addColorStop(0, 'rgba(255,255,255,0.42)');
+        hg.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.beginPath();
+        ctx.ellipse(hx, hy, r * 0.42, r * 0.28, -0.3, 0, Math.PI * 2);
+        ctx.fillStyle = hg;
+        ctx.fill();
+      }
+    }
+
+    function openCheddar() {
+      if (document.getElementById('cheddar-overlay')) return; // no double-trigger
+
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+
+      // Build overlay
+      const overlay = document.createElement('div');
+      overlay.id = 'cheddar-overlay';
+      Object.assign(overlay.style, {
+        position: 'fixed', inset: '0', zIndex: '9999', pointerEvents: 'all',
+      });
+
+      const canvas = document.createElement('canvas');
+      canvas.width  = W;
+      canvas.height = H;
+      Object.assign(canvas.style, { position: 'absolute', inset: '0', display: 'block' });
+      overlay.appendChild(canvas);
+      document.body.appendChild(overlay);
+
+      const ctx   = canvas.getContext('2d');
+      const drips = buildCheddarDrips(W, H);
+      let startTime = null;
+      let rafId;
+
+      function animate(ts) {
+        if (!startTime) startTime = ts;
+        const elapsed = ts - startTime;
+
+        ctx.clearRect(0, 0, W, H);
+
+        let allDone = true;
+        drips.forEach(drip => {
+          // Not started yet — draw nothing, flag as incomplete
+          if (elapsed < drip.delay) { allDone = false; return; }
+
+          if (!drip.done) {
+            drip.y += drip.speed;
+            if (drip.y >= H + drip.r) { drip.y = H + drip.r; drip.done = true; }
+            else { allDone = false; }
+          }
+
+          drawCheddarDrip(ctx, drip, H);
+        });
+
+        if (allDone) {
+          showCheddarVictory(overlay);
+        } else {
+          rafId = requestAnimationFrame(animate);
+        }
+      }
+
+      rafId = requestAnimationFrame(animate);
+
+      // Attach dismiss so Escape key can call it
+      overlay._dismiss = () => {
+        cancelAnimationFrame(rafId);
+        overlay.style.transition = 'opacity 0.55s ease';
+        overlay.style.opacity    = '0';
+        overlay.addEventListener('transitionend', () => overlay.remove(), { once: true });
+      };
+    }
+
+    function showCheddarVictory(overlay) {
+      const msg = document.createElement('div');
+      Object.assign(msg.style, {
+        position: 'absolute', inset: '0',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        textAlign: 'center', padding: '24px',
+        animation: 'msg-rise 0.55s cubic-bezier(0.16, 1, 0.3, 1) both',
+      });
+      msg.innerHTML = `
+        <p style="font-family:'Outfit',sans-serif;font-size:0.65rem;font-weight:500;
+                  letter-spacing:0.26em;text-transform:uppercase;
+                  color:rgba(255,255,255,0.65);margin-bottom:16px;">
+          The Cheese Has Won
+        </p>
+        <h2 style="font-family:'Cormorant Garamond',Georgia,serif;
+                   font-size:clamp(2.4rem,7vw,4.2rem);font-weight:300;
+                   color:white;line-height:1.15;margin-bottom:36px;
+                   text-shadow:0 4px 24px rgba(120,50,0,0.55);">
+          Everything is<br><em style="font-style:italic;font-weight:400;">Cheddar</em> now.
+        </h2>
+        <button id="cheddar-dismiss"
+          style="padding:13px 32px;border-radius:14px;
+                 background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);
+                 color:white;font-family:'Outfit',sans-serif;font-size:0.92rem;font-weight:500;
+                 cursor:pointer;letter-spacing:0.02em;
+                 transition:background 0.15s ease,transform 0.1s ease;">
+          Melt away
+        </button>
+      `;
+      overlay.appendChild(msg);
+
+      const btn = overlay.querySelector('#cheddar-dismiss');
+      btn.addEventListener('mouseenter', () => { btn.style.background = 'rgba(255,255,255,0.26)'; });
+      btn.addEventListener('mouseleave', () => { btn.style.background = 'rgba(255,255,255,0.15)'; });
+      btn.addEventListener('mousedown',  () => { btn.style.transform = 'scale(0.96)'; });
+      btn.addEventListener('mouseup',    () => { btn.style.transform = 'scale(1)'; });
+      btn.addEventListener('click',      () => overlay._dismiss());
+    }
+  </script>
+
 </body>
 </html>

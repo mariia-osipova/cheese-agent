@@ -1,4 +1,6 @@
-selenium
-webdriver-manager
-pillow
-requests
+fastapi
+uvicorn[standard]
+openai
+astrapy
+python-dotenv
+pydantic
