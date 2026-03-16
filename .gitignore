@@ -1,0 +1,13 @@
+# secrets — never commit these
+.env
+docker/.env
+
+# python
+.venv
+__pycache__/
+*.pyc
+
+# editor
+.idea
+.DS_Store
+cheese-frontend/src/.DS_Store

@@ -1,66 +1,182 @@
-# LangFlow + OpenAI Embeddings + MongoDB Atlas Vector Search Project
+# Cheese Master
 
-This document describes the full setup and configuration of a pipeline that uses LangFlow to:
-1. Read and split large text documents into chunks.
-2. Generate embeddings using OpenAI’s embedding models.
-3. Ingest those embeddings into MongoDB Atlas with a k-NN vector index.
-4. Perform semantic (vector) search over the stored embeddings.
+A beautiful AI-powered cheese chatbot with slash commands, a trivia quiz, a cheese selfie camera, and a cheddar takeover mode. Built with a FastAPI + AstraDB + OpenAI backend and a vanilla JS frontend deployed on GitHub Pages.
 
-I encountered several errors while configuring the LangFlow project. Most issues appeared during the database setup. Every time I tried to start the flow, I would see an error related to connecting to MongoDB Atlas (e.g., “knnVector field is indexed with 384 dimensions but queried with 1536” or “List of Data objects is not supported”). Make sure:  
-1. Your MongoDB Atlas URI, database name, and collection name are correct.  
-2. The `knnVector` index on the `embedding` field is set to `dimensions: 1536` if you are using OpenAI embeddings (1536-dimensional).  
-3. All LangFlow components (especially SplitText, OpenAI Embeddings, and MongoDB Atlas) are up to date and connected properly.  
-4. When SplitText produces a list of chunks, use a **For Each** node (or enable “Emit One Chunk At A Time”) so that downstream nodes don’t receive a list instead of a single string.  
-
-
-![img_2.png](img_2.png)
-
-![img_3.png](img_3.png)    
-## Table of Contents
-
-1. [Prerequisites & Environment](#prerequisites--environment)
-2. [Step 1: OpenAI API Setup](#step-1-openai-api-setup)
-3. [Step 2: Enabling Embedding Models](#step-2-enabling-embedding-models)
-4. [Step 3: Configuring MongoDB Atlas Vector Index](#step-3-configuring-mongodb-atlas-vector-index)
-5. [Step 4: Building the LangFlow Pipeline](#step-4-building-the-langflow-pipeline)
-    1. [4.1. Updating Outdated Components](#41-updating-outdated-components)
-    2. [4.2. Splitting Text & Iterating Over Chunks](#42-splitting-text--iterating-over-chunks)
-    3. [4.3. Generating Embeddings](#43-generating-embeddings)
-    4. [4.4. Ingesting Data into MongoDB Atlas](#44-ingesting-data-into-mongodb-atlas)
-    5. [4.5. Running a Vector Search Query](#45-running-a-vector-search-query)
-6. [Common Errors & Troubleshooting](#common-errors--troubleshooting)
-    1. [Error: `model_not_found` for Embedding Models](#error-model_not_found-for-embedding-models)
-    2. [Error: `List of Data objects is not supported`](#error-list-of-data-objects-is-not-supported)
-    3. [Error: Indexed with 384 but queried with 1536](#error-indexed-with-384-but-queried-with-1536)
-7. [Alternative Embedding Approaches](#alternative-embedding-approaches)
-8. [Example Usage & Verification](#example-usage--verification)
-9. [References & Useful Links](#references--useful-links)
-10. [Author & Contact](#author--contact)
+**Live demo:** `https://YOUR-GITHUB-USERNAME.github.io/langflow_cheese`
 
 ---
 
-## Prerequisites & Environment
+## What it does
 
-Before you begin, ensure you have:
+Chat with the Cheese Master — a knowledgeable AI that answers questions about cheese using a vector database of curated cheese knowledge. Type `/` in the chat to unlock a full command menu:
 
-- **An OpenAI account** with a working API key.
-- **LangFlow** installed (you can install via `pip install langflow`).
-- **MongoDB Atlas cluster** (can be free tier M0/M2/M5 or paid) with permissions to create indexes.
-- **Python 3.8+** (for any local testing or alternative embedding scripts).
-- Basic familiarity with:
-    - Command-line shell (bash/zsh)
-    - Python (for optional local embedding alternatives)
-    - The concept of vector search (k-NN) in databases
+| Command | Description |
+|---|---|
+| `/fact` | A surprising cheese fact |
+| `/pair [cheese]` | Food & wine pairings |
+| `/describe [cheese]` | Evocative tasting notes |
+| `/origin [cheese]` | History & provenance |
+| `/substitute [cheese]` | Alternatives when you're out |
+| `/board` | A curated cheese board suggestion |
+| `/season` | What's at peak right now |
+| `/quiz` | 5-question trivia challenge with multiple choice |
+| `/cheeseme` | Take a webcam selfie and get a cheese on your head |
+| `/cheddar` | Watch cheddar drip down until it consumes everything |
 
 ---
 
-## Step 1: OpenAI API Setup
+## Tech stack
 
-1. **Generate an API Key**
-    - Log in to [OpenAI Platform](https://platform.openai.com/account/api-keys).
-    - Click **+ Create new secret key** and copy the generated key (begins with `sk-...`).
+**Frontend**
+- Vanilla HTML / CSS / JS — no framework, no build step
+- Hosted on **GitHub Pages** (auto-deployed via GitHub Actions)
+- Fonts: Cormorant Garamond + Outfit (Google Fonts)
 
-2. **Export the API Key as an Environment Variable**  
-   In your terminal (bash/zsh), set:
-   ```bash
-   export OPENAI_API_KEY="sk-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+**Backend**
+- **FastAPI** — REST API with a single `/chat` endpoint
+- **OpenAI** — `text-embedding-3-small` for vector search, `gpt-4o-mini` for answers
+- **AstraDB** (DataStax) — serverless vector database storing cheese knowledge
+- Hosted on **Render** (free tier)
+
+---
+
+## Project structure
+
+```
+langflow_cheese/
+├── docs/                     # Static site (deployed to GitHub Pages)
+│   ├── index.html            # All UI, slash commands, quiz, selfie, cheddar
+│   ├── css/style.css
+│   ├── js/
+│   │   ├── index.js          # Sets random cheese background on load
+│   │   ├── images.js         # Auto-generated list of cheese image paths
+│   │   └── cheese_name_getter.js  # Node script to regenerate images.js
+│   └── src/cheese/           # 65 cheese background images
+│
+├── cheese-backend/           # FastAPI app (deployed to Render)
+│   ├── api.py                # /chat endpoint — embed → vector search → GPT answer
+│   ├── ingest.py             # One-time script to load cheese data into AstraDB
+│   ├── dataset/
+│   │   ├── cheeses.csv
+│   │   └── cheese_details.csv
+│   ├── Procfile              # Render start command
+│   ├── requirements.txt      # API dependencies only
+│   └── requirements-scraper.txt  # Selenium deps for the image scraper
+│
+├── .github/workflows/
+│   └── deploy-frontend.yml   # Auto-deploys cheese-frontend/ to GitHub Pages
+├── .env.example              # Template — copy to .env and fill in values
+└── docker/docker-compose.yml
+```
+
+---
+
+## Local development
+
+### 1. Clone the repo
+
+```bash
+git clone https://github.com/YOUR-USERNAME/langflow_cheese.git
+cd langflow_cheese
+```
+
+### 2. Set up the backend
+
+```bash
+cd cheese-backend
+python -m venv .venv
+source .venv/bin/activate      # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+Copy the env template and fill in your credentials:
+
+```bash
+cp ../.env.example ../.env
+# then edit .env with your real values
+```
+
+Start the API:
+
+```bash
+uvicorn api:app --reload
+# running at http://localhost:8000
+```
+
+### 3. Run the frontend
+
+The frontend is plain HTML — no build step needed. Open `docs/index.html` directly in a browser, or serve it with any static server:
+
+```bash
+cd docs
+python -m http.server 5500
+# open http://localhost:5500
+```
+
+### 4. Ingest cheese data (one-time)
+
+If you're starting fresh or want to reload the vector database:
+
+```bash
+cd cheese-backend
+python ingest.py --file dataset/cheeses.csv
+python ingest.py --file dataset/cheese_details.csv
+```
+
+---
+
+## Environment variables
+
+Copy `.env.example` to `.env` and fill in:
+
+| Variable | Required | Description |
+|---|---|---|
+| `OPENAI_API_KEY` | Yes | Your OpenAI API key |
+| `ASTRA_DB_APPLICATION_TOKEN` | Yes | AstraDB application token |
+| `ASTRA_DB_API_ENDPOINT` | Yes | AstraDB API endpoint URL |
+| `ASTRA_DB_KEYSPACE` | No | Defaults to `cheese_db` |
+| `ASTRA_DB_COLLECTION` | No | Defaults to `cheeses` |
+| `OPENAI_MODEL` | No | Defaults to `gpt-4o-mini` |
+| `EMBEDDING_MODEL` | No | Defaults to `text-embedding-3-small` |
+| `ALLOWED_ORIGINS` | No | Comma-separated CORS origins. Set to your GitHub Pages URL in production. |
+
+---
+
+## Deployment
+
+### Backend — Render
+
+1. Create a new **Web Service** on [render.com](https://render.com) and connect this repo
+2. Set **Root Directory** to `cheese-backend`
+3. **Build command:** `pip install -r requirements.txt`
+4. **Start command:** `uvicorn api:app --host 0.0.0.0 --port $PORT`
+5. Add environment variables in the Render dashboard (same as above)
+6. Add `ALLOWED_ORIGINS=https://YOUR-USERNAME.github.io` to lock down CORS
+7. Your backend URL will be `https://your-service-name.onrender.com`
+
+> The free Render tier sleeps after 15 minutes of inactivity. Use [cron-job.org](https://cron-job.org) (free) to ping `/health` every 14 minutes to keep it awake.
+
+### Frontend — GitHub Pages
+
+1. In `docs/index.html`, update the production API URL:
+   ```js
+   : "https://your-render-service.onrender.com/chat";
+   ```
+2. Push to `main`
+3. In your GitHub repo: **Settings → Pages → Source → GitHub Actions**
+4. The workflow in `.github/workflows/deploy-frontend.yml` deploys automatically on every push to `main` that touches `docs/`
+
+---
+
+## Security notes
+
+- `.env` is gitignored — never commit real credentials
+- CORS is locked to specific origins via the `ALLOWED_ORIGINS` env var
+- The `/chat` endpoint only accepts `POST` requests with a JSON body
+- No user data is stored — each request is stateless
+
+---
+
+## Credits
+
+Built with OpenAI, AstraDB (DataStax), FastAPI, and a deep love of cheese.

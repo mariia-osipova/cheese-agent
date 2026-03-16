@@ -1,0 +1,15 @@
+services:
+  api:
+    image: python:3.11-slim
+    working_dir: /app
+    volumes:
+      - ../cheese-backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ASTRA_DB_APPLICATION_TOKEN: ${ASTRA_DB_APPLICATION_TOKEN}
+      ASTRA_DB_API_ENDPOINT: ${ASTRA_DB_API_ENDPOINT}
+      ASTRA_DB_COLLECTION: ${ASTRA_DB_COLLECTION:-cheeses}
+    command: sh -c "pip install -r requirements.txt -q && uvicorn api:app --host 0.0.0.0 --port 8000"
+    restart: unless-stopped
