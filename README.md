@@ -160,7 +160,8 @@ Copy `.env.example` to `.env` and fill in:
 ### Frontend — GitHub Pages
 
 1. In `docs/index.html`, update the production API URL:
-   ```js: "https://your-render-service.onrender.com/chat";
+   ```js
+   : "https://your-render-service.onrender.com/chat";
    ```
 2. Push to `main`
 3. In your GitHub repo: **Settings → Pages → Source → GitHub Actions**
