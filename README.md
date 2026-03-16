@@ -20,6 +20,11 @@ Chat with the Cheese Master — a knowledgeable AI that answers questions about 
 | `/substitute [cheese]` | Alternatives when you're out |
 | `/board` | A curated cheese board suggestion |
 | `/season` | What's at peak right now |
+| `/joke` | A clever cheese joke or pun |
+| `/recipe [cheese]` | A recipe starring that cheese |
+| `/compare [A and B]` | Side-by-side comparison of two cheeses |
+| `/country [country]` | Cheese culture and icons from any country |
+| `/emoji [cheese]` | Describe a cheese using only emojis |
 | `/quiz` | 5-question trivia challenge with multiple choice |
 | `/cheeseme` | Take a webcam selfie and get a cheese on your head |
 | `/cheddar` | Watch cheddar drip down until it consumes everything |

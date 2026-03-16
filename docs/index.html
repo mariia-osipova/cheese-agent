@@ -678,6 +678,16 @@
         prompt: 'Suggest a beautifully curated cheese board: 4–5 cheeses, the right accompaniments, presentation tips, and the rationale behind your choices.' },
       { cmd: '/season',   icon: '◌', label: 'In Season',    desc: 'What\'s at peak right now', type: 'immediate',
         prompt: 'What cheeses are at their absolute peak right now? Give me 3–4 seasonal picks with tasting notes and serving suggestions.' },
+      { cmd: '/joke',     icon: '😄', label: 'Cheese Joke',  desc: 'Hit me with a cheese pun or joke', type: 'immediate',
+        prompt: 'Tell me a clever, funny, or groan-worthy cheese joke or pun. Make it genuinely witty, not generic.' },
+      { cmd: '/recipe',   icon: '🍳', label: 'Recipe',       desc: 'A recipe starring any cheese', type: 'template', arg: 'cheese name',
+        promptFn: (a) => `Give me a delicious recipe where ${a} is the star ingredient. Include ingredients, steps, and a tip for getting the best flavour out of the cheese.` },
+      { cmd: '/compare',  icon: '⚖', label: 'Compare',      desc: 'Compare two cheeses side by side', type: 'template', arg: 'cheese A and cheese B',
+        promptFn: (a) => `Compare ${a} side by side: origin, texture, flavour profile, best uses, and which type of person would prefer each. Keep it lively and opinionated.` },
+      { cmd: '/country',  icon: '🌍', label: 'By Country',   desc: 'Explore cheeses from any country', type: 'template', arg: 'country name',
+        promptFn: (a) => `Tell me about the cheese culture of ${a}. What are its most iconic cheeses, what makes them unique, and what should a first-time explorer try first?` },
+      { cmd: '/emoji',    icon: '✨', label: 'Cheese Emoji',  desc: 'Describe any cheese only in emojis', type: 'template', arg: 'cheese name',
+        promptFn: (a) => `Describe ${a} using only emojis — capture its flavour, texture, origin, and vibe. Then give a one-sentence explanation of your emoji choices.` },
     ];
 
     // ── DOM refs ──────────────────────────────────────────────────────────
