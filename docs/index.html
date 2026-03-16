@@ -183,7 +183,7 @@
     #palette-wrapper {
       flex-shrink: 0;
       display: grid; grid-template-rows: 0fr;
-      transition: grid-template-rows 0.22s cubic-bezier(0.16,1,0.3,1);
+      transition: grid-template-rows 0.16s cubic-bezier(0.16,1,0.3,1);
     }
     #palette-wrapper.open { grid-template-rows: 1fr; }
     #command-palette { min-height: 0; overflow: hidden; }
@@ -197,7 +197,10 @@
       font-size: 0.55rem; font-weight: 500; letter-spacing: 0.22em;
       text-transform: uppercase; color: rgba(49,56,60,0.45);
     }
-    .palette-list { list-style: none; padding: 2px 8px 6px; }
+    .palette-list { list-style: none; padding: 2px 8px 6px; max-height: 192px; overflow-y: auto; }
+    .palette-list::-webkit-scrollbar { width: 3px; }
+    .palette-list::-webkit-scrollbar-track { background: transparent; }
+    .palette-list::-webkit-scrollbar-thumb { background: rgba(49,56,60,0.2); border-radius: 2px; }
 
     .command-item {
       width: 100%; display: flex; align-items: center; gap: 10px;
