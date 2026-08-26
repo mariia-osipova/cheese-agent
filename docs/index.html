@@ -669,6 +669,9 @@
     }
 
     const COMMANDS = [
+      { cmd: '/quiz',      icon: '◇', label: 'Quiz Me',      desc: '5-question trivia challenge with multiple choice', type: 'local', fn: openQuiz },
+      { cmd: '/cheeseme', icon: '📸', label: 'Cheese Me',    desc: 'Take a webcam selfie and get cheese on your head', type: 'local', fn: openSelfie },
+      { cmd: '/cheddar',  icon: '🟠', label: 'Go Cheddar',   desc: 'Watch cheddar drip down until it consumes everything', type: 'local', fn: openCheddar },
       { cmd: '/fact',     icon: '◈', label: 'Random Fact',  desc: 'A surprising cheese fact', type: 'immediate',
         prompt: 'Give exactly one surprising, specific cheese fact in 2-4 sentences. Include the cheese, region, or cheesemaking process involved when relevant. Keep it accurate and avoid generic trivia.' },
       { cmd: '/pair',     icon: '⊕', label: 'Pairings',     desc: 'Food & wine pairings for any cheese', type: 'template', arg: 'cheese name', example: '/pair brie',
@@ -693,9 +696,6 @@
         promptFn: (a) => `Give a concise guide to the cheese culture of ${a}. Include iconic cheeses, regional styles, milk traditions, how people usually eat or serve them, and the best first 3 cheeses to try.` },
       { cmd: '/emoji',    icon: '✨', label: 'Cheese Emoji',  desc: 'Describe a cheese using only emojis', type: 'template', arg: 'cheese name', example: '/emoji gorgonzola',
         promptFn: (a) => `Describe ${a} using only emojis. Output emojis only: no words, no punctuation, no headings, and no explanation.` },
-      { cmd: '/quiz',      icon: '◇', label: 'Quiz Me',      desc: '5-question trivia challenge with multiple choice', type: 'local', fn: openQuiz },
-      { cmd: '/cheeseme', icon: '📸', label: 'Cheese Me',    desc: 'Take a webcam selfie and get cheese on your head', type: 'local', fn: openSelfie },
-      { cmd: '/cheddar',  icon: '🟠', label: 'Go Cheddar',   desc: 'Watch cheddar drip down until it consumes everything', type: 'local', fn: openCheddar },
     ];
 
     // ── DOM refs ──────────────────────────────────────────────────────────
