@@ -660,34 +660,42 @@
     ];
 
     // ── Commands ──────────────────────────────────────────────────────────
+    function currentDateForPrompt() {
+      return new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+    }
+
     const COMMANDS = [
-      { cmd: '/quiz',      icon: '◇', label: 'Quiz Me',      desc: 'Test your cheese knowledge with 5 questions', type: 'local', fn: openQuiz },
-      { cmd: '/cheeseme', icon: '📸', label: 'Cheese Me',    desc: 'Take a selfie & get cheese on your head',     type: 'local', fn: openSelfie },
-      { cmd: '/cheddar',  icon: '🟠', label: 'Go Cheddar',   desc: 'Watch cheddar drip down and consume the world', type: 'local', fn: openCheddar },
-      { cmd: '/fact',     icon: '◈', label: 'Random Fact',  desc: 'Get a surprising cheese fact', type: 'immediate',
-        prompt: 'Share a surprising, delightful, or little-known fact about cheese — something that would make a cheese lover say "I never knew that!"' },
-      { cmd: '/pair',     icon: '⊕', label: 'Pairings',     desc: 'Food & wine pairings for any cheese', type: 'template', arg: 'cheese name',
-        promptFn: (a) => `What foods, wines, and drinks pair best with ${a}? Give 4–5 specific pairings with a brief explanation of why each works.` },
-      { cmd: '/describe', icon: '◉', label: 'Tasting Notes', desc: 'Evocative sensory description of a cheese', type: 'template', arg: 'cheese name',
-        promptFn: (a) => `Give me rich, evocative tasting notes for ${a} — its texture, rind, aroma, and flavor profile. Make it vivid.` },
-      { cmd: '/origin',   icon: '◎', label: 'Origin Story', desc: 'History & provenance of a cheese', type: 'template', arg: 'cheese name',
-        promptFn: (a) => `Tell me about the origin, history, and cultural significance of ${a}. Where does it come from and why does it matter?` },
-      { cmd: '/substitute', icon: '⇌', label: 'Find a Sub', desc: 'Best alternatives when you\'re out of a cheese', type: 'template', arg: 'cheese name',
-        promptFn: (a) => `What are the best substitutes for ${a}? For each, explain when it works as a replacement and when it falls short.` },
-      { cmd: '/board',    icon: '◆', label: 'Cheese Board', desc: 'A curated cheese board built just for now', type: 'immediate',
-        prompt: 'Suggest a beautifully curated cheese board: 4–5 cheeses, the right accompaniments, presentation tips, and the rationale behind your choices.' },
-      { cmd: '/season',   icon: '◌', label: 'In Season',    desc: 'What\'s at peak right now', type: 'immediate',
-        prompt: 'What cheeses are at their absolute peak right now? Give me 3–4 seasonal picks with tasting notes and serving suggestions.' },
-      { cmd: '/joke',     icon: '😄', label: 'Cheese Joke',  desc: 'Hit me with a cheese pun or joke', type: 'immediate',
-        prompt: 'Tell me a clever, funny, or groan-worthy cheese joke or pun. Make it genuinely witty, not generic.' },
-      { cmd: '/recipe',   icon: '🍳', label: 'Recipe',       desc: 'A recipe starring any cheese', type: 'template', arg: 'cheese name',
-        promptFn: (a) => `Give me a delicious recipe where ${a} is the star ingredient. Include ingredients, steps, and a tip for getting the best flavour out of the cheese.` },
-      { cmd: '/compare',  icon: '⚖', label: 'Compare',      desc: 'Compare two cheeses side by side', type: 'template', arg: 'cheese A and cheese B',
-        promptFn: (a) => `Compare ${a} side by side: origin, texture, flavour profile, best uses, and which type of person would prefer each. Keep it lively and opinionated.` },
-      { cmd: '/country',  icon: '🌍', label: 'By Country',   desc: 'Explore cheeses from any country', type: 'template', arg: 'country name',
-        promptFn: (a) => `Tell me about the cheese culture of ${a}. What are its most iconic cheeses, what makes them unique, and what should a first-time explorer try first?` },
-      { cmd: '/emoji',    icon: '✨', label: 'Cheese Emoji',  desc: 'Describe any cheese only in emojis', type: 'template', arg: 'cheese name',
-        promptFn: (a) => `Describe ${a} using only emojis — capture its flavour, texture, origin, and vibe. Then give a one-sentence explanation of your emoji choices.` },
+      { cmd: '/fact',     icon: '◈', label: 'Random Fact',  desc: 'A surprising cheese fact', type: 'immediate',
+        prompt: 'Give exactly one surprising, specific cheese fact in 2-4 sentences. Include the cheese, region, or cheesemaking process involved when relevant. Keep it accurate and avoid generic trivia.' },
+      { cmd: '/pair',     icon: '⊕', label: 'Pairings',     desc: 'Food & wine pairings for any cheese', type: 'template', arg: 'cheese name', example: '/pair brie',
+        promptFn: (a) => `Recommend pairings for ${a}. Include 3 foods, 2 wines or beers, and 1 non-alcoholic drink. For each pairing, explain briefly why it works with the cheese's texture, salt, fat, aroma, or flavor.` },
+      { cmd: '/describe', icon: '◉', label: 'Tasting Notes', desc: 'Evocative tasting notes for a cheese', type: 'template', arg: 'cheese name', example: '/describe camembert',
+        promptFn: (a) => `Write vivid but practical tasting notes for ${a}. Cover appearance, texture, rind if relevant, aroma, flavor progression, finish, and best serving temperature. Keep it concise and sensory.` },
+      { cmd: '/origin',   icon: '◎', label: 'Origin Story', desc: 'History & provenance of a cheese', type: 'template', arg: 'cheese name', example: '/origin manchego',
+        promptFn: (a) => `Explain the origin and provenance of ${a}: where it comes from, how it is traditionally made, what culture or region shaped it, and any protected-name status if relevant. Separate known facts from uncertainty.` },
+      { cmd: '/substitute', icon: '⇌', label: 'Find a Sub', desc: 'Alternatives when you are out of a cheese', type: 'template', arg: 'cheese name', example: '/substitute parmesan',
+        promptFn: (a) => `Suggest the best substitutes for ${a}. Give 4 options, ranked. For each, explain when it works, when it does not, and whether it is best for melting, snacking, grating, baking, or a cheese board.` },
+      { cmd: '/board',    icon: '◆', label: 'Cheese Board', desc: 'A curated cheese board suggestion', type: 'immediate',
+        prompt: 'Design a balanced cheese board for 4-6 people. Include 5 cheeses with varied milk types, textures, and intensity; add accompaniments, serving order, portions, and one presentation tip.' },
+      { cmd: '/season',   icon: '◌', label: 'In Season',    desc: 'What is at peak right now', type: 'immediate',
+        prompt: () => `Today is ${currentDateForPrompt()}. Recommend 3-4 cheeses that are especially good for this time of year. Include why seasonality matters, tasting notes, serving ideas, and note if availability depends on region.` },
+      { cmd: '/joke',     icon: '😄', label: 'Cheese Joke',  desc: 'A clever cheese joke or pun', type: 'immediate',
+        prompt: 'Tell one clever cheese joke or pun. Make it short, original-sounding, and actually punchy. Do not explain the joke unless the explanation is part of the punchline.' },
+      { cmd: '/recipe',   icon: '🍳', label: 'Recipe',       desc: 'A recipe starring any cheese', type: 'template', arg: 'cheese name', example: '/recipe halloumi',
+        promptFn: (a) => `Create a recipe where ${a} is the star ingredient. Include a short description, servings, ingredients with amounts, clear steps, timing, and one technique tip for getting the best flavor and texture from the cheese.` },
+      { cmd: '/compare',  icon: '⚖', label: 'Compare',      desc: 'Compare two cheeses side by side', type: 'template', arg: 'cheese A and cheese B', example: '/compare cheddar and gouda',
+        promptFn: (a) => `Compare ${a} side by side. Use a compact table for origin, milk, texture, flavor, aroma, aging, best uses, pairings, and who would prefer each. End with a clear recommendation for different situations.` },
+      { cmd: '/country',  icon: '🌍', label: 'By Country',   desc: 'Cheese culture and icons from any country', type: 'template', arg: 'country name', example: '/country France',
+        promptFn: (a) => `Give a concise guide to the cheese culture of ${a}. Include iconic cheeses, regional styles, milk traditions, how people usually eat or serve them, and the best first 3 cheeses to try.` },
+      { cmd: '/emoji',    icon: '✨', label: 'Cheese Emoji',  desc: 'Describe a cheese using only emojis', type: 'template', arg: 'cheese name', example: '/emoji gorgonzola',
+        promptFn: (a) => `Describe ${a} using only emojis. Output emojis only: no words, no punctuation, no headings, and no explanation.` },
+      { cmd: '/quiz',      icon: '◇', label: 'Quiz Me',      desc: '5-question trivia challenge with multiple choice', type: 'local', fn: openQuiz },
+      { cmd: '/cheeseme', icon: '📸', label: 'Cheese Me',    desc: 'Take a webcam selfie and get cheese on your head', type: 'local', fn: openSelfie },
+      { cmd: '/cheddar',  icon: '🟠', label: 'Go Cheddar',   desc: 'Watch cheddar drip down until it consumes everything', type: 'local', fn: openCheddar },
     ];
 
     // ── DOM refs ──────────────────────────────────────────────────────────
@@ -762,14 +770,26 @@
       });
     }
 
+    function getCommandPrompt(cmd, arg = '') {
+      if (cmd.type === 'template') return cmd.promptFn(arg.trim());
+      return typeof cmd.prompt === 'function' ? cmd.prompt() : cmd.prompt;
+    }
+
+    function usageFor(cmd) {
+      return cmd.type === 'template'
+        ? `Use ${cmd.cmd} [${cmd.arg}], for example: ${cmd.example}.`
+        : `Use ${cmd.cmd}.`;
+    }
+
     function selectCommand(cmd) {
       closePalette();
       if (cmd.type === 'local') {
         inputEl.value = '';
+        addMessage(cmd.cmd, 'user', true);
         cmd.fn();
       } else if (cmd.type === 'immediate') {
         inputEl.value = '';
-        dispatchCommand(cmd.cmd, cmd.prompt);
+        dispatchCommand(cmd.cmd, getCommandPrompt(cmd));
       } else {
         inputEl.value = cmd.cmd + ' ';
         inputEl.focus();
@@ -807,13 +827,21 @@
       sendBtn.disabled = true;
       const typingEl = addMessage('Cheesing', 'bot typing');
       try {
-        const res  = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: prompt }) });
-        const data = await res.json();
+        const res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: prompt }) });
+        const contentType = res.headers.get('content-type') || '';
+        const data = contentType.includes('application/json')
+          ? await res.json()
+          : { detail: await res.text() };
+
+        if (!res.ok) throw new Error(data.detail || `Backend returned ${res.status}`);
+
         typingEl.textContent = data.reply || data.detail || 'Something went wrong.';
         typingEl.classList.remove('typing');
-      } catch {
+      } catch (err) {
         typingEl.className = 'msg error';
-        typingEl.textContent = 'Could not reach the backend. Is it running?';
+        typingEl.textContent = err?.message
+          ? `Could not get a reply: ${err.message}`
+          : 'Could not reach the backend. Is it running?';
       } finally {
         sendBtn.disabled = false;
         inputEl.focus();
@@ -829,12 +857,12 @@
       const match = raw.match(/^\/(\w+)(?:\s+(.+))?$/);
       if (!match) return null;
       const [, name, arg] = match;
-      const cmd = COMMANDS.find(c => c.cmd === `/${name}`);
-      if (!cmd) return null;
+      const cmd = COMMANDS.find(c => c.cmd === `/${name.toLowerCase()}`);
+      if (!cmd) return { error: `Unknown command "${raw.split(/\s+/)[0]}". Type / to see what is available.` };
       if (cmd.type === 'local')     return { local: true, fn: cmd.fn };
-      if (cmd.type === 'immediate') return { display: cmd.cmd, prompt: cmd.prompt };
-      if (!arg) return null;
-      return { display: raw, prompt: cmd.promptFn(arg.trim()) };
+      if (cmd.type === 'immediate') return { display: cmd.cmd, prompt: getCommandPrompt(cmd) };
+      if (!arg || !arg.trim()) return { error: usageFor(cmd) };
+      return { display: raw, prompt: getCommandPrompt(cmd, arg) };
     }
 
     async function sendMessage() {
@@ -846,10 +874,15 @@
         const resolved = resolveSlashCommand(raw);
         if (!resolved) {
           addMessage(raw, 'user', true);
-          addMessage("Unknown or incomplete command. Type / to see what's available.", 'bot');
+          addMessage('That command format is not valid. Type / to see what is available.', 'bot');
           return;
         }
-        if (resolved.local) { resolved.fn(); return; }
+        if (resolved?.error) {
+          addMessage(raw, 'user', true);
+          addMessage(resolved.error, 'bot');
+          return;
+        }
+        if (resolved.local) { addMessage(raw, 'user', true); resolved.fn(); return; }
         await dispatchCommand(resolved.display, resolved.prompt);
       } else {
         addMessage(raw, 'user');
@@ -865,8 +898,8 @@
 
     inputEl.addEventListener('keydown', (e) => {
       if (paletteOpen) {
-        if (e.key === 'ArrowDown')  { e.preventDefault(); activeIndex = (activeIndex + 1) % filteredCmds.length; updateActive(); return; }
-        if (e.key === 'ArrowUp')    { e.preventDefault(); activeIndex = (activeIndex - 1 + filteredCmds.length) % filteredCmds.length; updateActive(); return; }
+        if (e.key === 'ArrowDown')  { e.preventDefault(); if (!filteredCmds.length) return; activeIndex = (activeIndex + 1) % filteredCmds.length; updateActive(); return; }
+        if (e.key === 'ArrowUp')    { e.preventDefault(); if (!filteredCmds.length) return; activeIndex = (activeIndex - 1 + filteredCmds.length) % filteredCmds.length; updateActive(); return; }
         if (e.key === 'Enter')      { e.preventDefault(); if (filteredCmds[activeIndex]) selectCommand(filteredCmds[activeIndex]); return; }
         if (e.key === 'Escape')     { e.preventDefault(); closePalette(); return; }
       }
@@ -888,21 +921,46 @@
     const quizBody     = document.getElementById('quiz-body');
     const quizFooter   = document.getElementById('quiz-footer');
     const quizProgress = document.getElementById('quiz-progress-bar');
-    const quizCounter  = document.getElementById('quiz-counter');
-    const quizQText    = document.getElementById('quiz-question-text');
-    const quizOptions  = document.getElementById('quiz-options');
-    const quizFeedback = document.getElementById('quiz-feedback');
-    const feedVerdict  = document.getElementById('feedback-verdict');
-    const feedText     = document.getElementById('feedback-text');
-    const quizDots     = document.getElementById('quiz-score-dots');
-    const quizNext     = document.getElementById('quiz-next');
+    let quizCounter;
+    let quizQText;
+    let quizOptions;
+    let quizFeedback;
+    let feedVerdict;
+    let feedText;
+    let quizDots;
+    let quizNext;
 
     let quizQueue   = [];
     let quizIndex   = 0;
     let quizScore   = 0;
     let quizResults = [];
 
+    function resetQuizShell() {
+      quizBody.innerHTML = `
+        <p class="quiz-counter" id="quiz-counter">Question 1 of ${QUIZ_LENGTH}</p>
+        <h2 class="quiz-question" id="quiz-question-text"></h2>
+        <div class="quiz-options" id="quiz-options"></div>
+        <div class="quiz-feedback" id="quiz-feedback" hidden>
+          <p class="feedback-verdict" id="feedback-verdict"></p>
+          <p class="feedback-text" id="feedback-text"></p>
+        </div>`;
+      quizFooter.innerHTML = `
+        <div class="quiz-score-dots" id="quiz-score-dots"></div>
+        <button class="quiz-next-btn" id="quiz-next" hidden>Next →</button>`;
+
+      quizCounter  = document.getElementById('quiz-counter');
+      quizQText    = document.getElementById('quiz-question-text');
+      quizOptions  = document.getElementById('quiz-options');
+      quizFeedback = document.getElementById('quiz-feedback');
+      feedVerdict  = document.getElementById('feedback-verdict');
+      feedText     = document.getElementById('feedback-text');
+      quizDots     = document.getElementById('quiz-score-dots');
+      quizNext     = document.getElementById('quiz-next');
+      quizNext.addEventListener('click', goToNextQuizQuestion);
+    }
+
     function openQuiz() {
+      resetQuizShell();
       quizQueue   = [...QUIZ_QUESTIONS].sort(() => Math.random() - 0.5).slice(0, QUIZ_LENGTH);
       quizIndex   = 0;
       quizScore   = 0;
@@ -967,11 +1025,11 @@
       quizNext.hidden = false;
     }
 
-    quizNext.addEventListener('click', () => {
+    function goToNextQuizQuestion() {
       quizIndex++;
       if (quizIndex >= QUIZ_LENGTH) showQuizFinal();
       else loadQuizQuestion();
-    });
+    }
 
     function showQuizFinal() {
       quizProgress.style.width = '100%';
@@ -1027,7 +1085,47 @@
       "You've got great taste — literally.",
     ];
 
+    function stopCameraStream() {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(t => t.stop());
+        cameraStream = null;
+      }
+    }
+
+    function resetSelfieViewport() {
+      selfieViewport.innerHTML = '';
+      selfieViewport.appendChild(selfieVideo);
+      selfieViewport.appendChild(selfieCanvas);
+      selfieViewport.appendChild(selfieCountdown);
+      selfieVideo.srcObject = null;
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, ch => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      }[ch]));
+    }
+
+    function showSelfieCameraError(message = "Camera access was denied or isn't available.") {
+      stopCameraStream();
+      selfieViewport.innerHTML = `
+        <div class="selfie-camera-error">
+          <span class="selfie-camera-error-icon">📵</span>
+          <p class="selfie-camera-error-text">${escapeHtml(message)}<br>Please allow camera permissions and try again.</p>
+        </div>`;
+      selfieCapture.disabled = true;
+      selfieCapture.hidden = false;
+      selfieRetake.hidden = true;
+      selfieDownload.hidden = true;
+    }
+
     async function openSelfie() {
+      stopCameraStream();
+      resetSelfieViewport();
       selfieModal.hidden = false;
       selfieEyebrow.textContent = 'Cheese Me';
       selfieCaption.textContent = 'Center your face in the frame';
@@ -1041,42 +1139,38 @@
       selfieDownload.hidden = true;
 
       try {
+        if (!navigator.mediaDevices?.getUserMedia) {
+          throw new Error('Camera access requires a modern browser and HTTPS or localhost.');
+        }
         cameraStream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
         });
         selfieVideo.srcObject = cameraStream;
         await selfieVideo.play();
       } catch (err) {
-        if (err.name === 'AbortError') return;
-        selfieViewport.innerHTML = `
-          <div class="selfie-camera-error">
-            <span class="selfie-camera-error-icon">📵</span>
-            <p class="selfie-camera-error-text">Camera access was denied or isn't available.<br>Please allow camera permissions and try again.</p>
-          </div>`;
-        selfieCapture.disabled = true;
+        if (err?.name === 'AbortError') return;
+        showSelfieCameraError(err?.message || undefined);
       }
     }
 
     function closeSelfie() {
-      if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
+      stopCameraStream();
       selfieModal.hidden = true;
-      selfieViewport.innerHTML = '';
-      selfieViewport.appendChild(selfieVideo);
-      selfieViewport.appendChild(selfieCanvas);
-      selfieViewport.appendChild(selfieCountdown);
-      selfieVideo.srcObject = null;
+      resetSelfieViewport();
     }
 
     async function startCountdown() {
       selfieCapture.disabled = true;
       selfieCountdown.hidden = false;
       for (let i = 3; i >= 1; i--) {
+        if (selfieModal.hidden) return;
         countdownNum.textContent = i;
         countdownNum.style.animation = 'none';
         countdownNum.offsetHeight;
         countdownNum.style.animation = 'countdown-pop 0.85s cubic-bezier(0.16,1,0.3,1) both';
         await new Promise(r => setTimeout(r, 900));
       }
+      if (selfieModal.hidden) return;
       selfieCountdown.hidden = true;
       takeSelfie();
     }
@@ -1091,7 +1185,7 @@
       ctx.drawImage(selfieVideo, 0, 0, W, H);
       ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-      if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
+      stopCameraStream();
 
       const pool = (window.CHEESE_PNGS && window.CHEESE_PNGS.length > 0)
         ? window.CHEESE_PNGS
@@ -1136,11 +1230,18 @@
       selfieCapture.disabled = false;
       selfieRetake.hidden    = true;
       selfieDownload.hidden  = true;
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } }).then(stream => {
-        cameraStream = stream;
-        selfieVideo.srcObject = stream;
-        selfieVideo.play().catch(() => {});
-      });
+      resetSelfieViewport();
+      if (!navigator.mediaDevices?.getUserMedia) {
+        showSelfieCameraError('Camera access requires a modern browser and HTTPS or localhost.');
+        return;
+      }
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
+        .then(stream => {
+          cameraStream = stream;
+          selfieVideo.srcObject = stream;
+          selfieVideo.play().catch(() => {});
+        })
+        .catch(err => showSelfieCameraError(err?.message || undefined));
     });
 
     selfieDownload.addEventListener('click', () => {
