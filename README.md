@@ -1,6 +1,6 @@
-# Cheese Master
+# Cheese Agent
 
-A beautiful AI-powered cheese chatbot with slash commands, a trivia quiz, a cheese selfie camera, and a cheddar takeover mode. Built with an Express.js backend (with Gemini & OpenAI support, plus local knowledge base fallback) and a responsive vanilla JS frontend.
+An AI-powered cheese chatbot with slash commands, a trivia quiz, a cheese selfie camera, and a cheddar takeover mode. Built with an Express.js backend (with Gemini & OpenAI support, plus local knowledge base fallback) and a responsive vanilla JS frontend.
 
 | ![img_1.png](img_1.png) | ![img.png](img.png) |
 |---|---|
