@@ -1,15 +1,15 @@
 # Cheese Master
 
-A beautiful AI-powered cheese chatbot with slash commands, a trivia quiz, a cheese selfie camera, and a cheddar takeover mode. Built with a FastAPI + AstraDB + OpenAI backend and a vanilla JS frontend deployed on GitHub Pages.
+A beautiful AI-powered cheese chatbot with slash commands, a trivia quiz, a cheese selfie camera, and a cheddar takeover mode. Built with an Express.js backend (with Gemini & OpenAI support, plus local knowledge base fallback) and a responsive vanilla JS frontend.
 
 | ![img_1.png](img_1.png) | ![img.png](img.png) |
-|-------------------------|---|
+|---|---|
 
 ---
 
 ## What it does
 
-Chat with the Cheese Master — a knowledgeable AI that answers questions about cheese using a vector database of curated cheese knowledge. Type `/` in the chat to unlock a full command menu:
+Chat with the Cheese Master — a knowledgeable AI affineur that answers questions about cheese using a curated database of 1,180+ artisanal cheeses from around the world. Type `/` in the chat to unlock a full command menu:
 
 | Command | Description |
 |---|---|
@@ -31,158 +31,128 @@ Chat with the Cheese Master — a knowledgeable AI that answers questions about 
 
 ---
 
-## Tech stack
+## Tech Stack
 
 **Frontend**
-- Vanilla HTML / CSS / JS — no framework, no build step
-- Hosted on **GitHub Pages** (auto-deployed via GitHub Actions)
+- Vanilla HTML / CSS / JS — clean, responsive interface
+- Interactive Canvas for webcam selfie filters and cheddar fluid effects
 - Fonts: Cormorant Garamond + Outfit (Google Fonts)
 
 **Backend**
-- **FastAPI** — REST API with a single `/chat` endpoint
-- **OpenAI** — `text-embedding-3-small` for vector search, `gpt-4o-mini` for answers
-- **AstraDB** (DataStax) — serverless vector database storing cheese knowledge
-- Hosted on **Render** (free tier)
+- **Node.js (Express)** — unified server hosting static assets and handling `/chat` & `/health` API endpoints
+- **AI Intelligence**:
+  - **Gemini (`@google/genai`)**: Uses `gemini-2.5-flash` with grounded cheese database context
+  - **OpenAI**: Compatible with `gpt-4o-mini`
+  - **Local Knowledge Engine**: Instant offline fallback with 1,180+ indexed cheeses
+- **Dataset**: `data/cheeses.json` containing detailed cheese origins, milk types, textures, flavor profiles, and pairings
 
 ---
 
-## Project structure
+## Project Structure
 
 ```
-langflow_cheese/
-├── docs/                     # Static site (deployed to GitHub Pages)
-│   ├── index.html            # All UI, slash commands, quiz, selfie, cheddar
+cheese-agent/
+├── docs/                     # Frontend web application
+│   ├── index.html            # UI, chat, slash commands, quiz, selfie, animations
 │   ├── css/style.css
 │   ├── js/
-│   │   ├── index.js          # Sets random cheese background on load
-│   │   ├── images.js         # Auto-generated list of cheese image paths
-│   │   └── cheese_name_getter.js  # Node script to regenerate images.js
-│   └── src/cheese/           # 65 cheese background images
+│   │   ├── index.js          # Cheese background rotator and entry point
+│   │   ├── images.js         # List of cheese images
+│   │   └── cheese_name_getter.js
+│   └── src/cheese/           # Cheese background & asset images
 │
-├── cheese-backend/           # FastAPI app (deployed to Render)
-│   ├── api.py                # /chat endpoint — embed → vector search → GPT answer
-│   ├── ingest.py             # One-time script to load cheese data into AstraDB
-│   ├── dataset/
-│   │   ├── cheeses.csv
-│   │   └── cheese_details.csv
-│   ├── Procfile              # Render start command
-│   ├── requirements.txt      # API dependencies only
-│   └── requirements-scraper.txt  # Selenium deps for the image scraper
+├── data/
+│   └── cheeses.json          # Indexed knowledge base (1,180+ cheeses)
 │
-├── .github/workflows/
-│   └── deploy-frontend.yml   # Auto-deploys cheese-frontend/ to GitHub Pages
-├── .env.example              # Template — copy to .env and fill in values
-└── docker/docker-compose.yml
+├── server.js                 # Express server & AI integration (/chat, /health)
+├── package.json              # NPM dependencies & scripts
+├── metadata.json             # App metadata & permissions
+└── .env.example              # Environment variables template
 ```
 
 ---
 
-## Local development
+## Local Development
 
-### 1. Clone the repo
-
-```bash
-git clone https://github.com/YOUR-USERNAME/langflow_cheese.git
-cd langflow_cheese
-```
-
-### 2. Set up the backend
+### 1. Clone the repository
 
 ```bash
-cd cheese-backend
-python -m venv .venv
-source .venv/bin/activate      # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+git clone https://github.com/mariia-osipova/cheese-agent.git
+cd cheese-agent
 ```
 
-Copy the env template and fill in your credentials:
+### 2. Install dependencies
 
 ```bash
-cp ../.env.example ../.env
-# then edit .env with your real values
+npm install
 ```
 
-Start the API:
+### 3. Configure environment variables (Optional)
+
+Create a `.env` file from the template:
 
 ```bash
-uvicorn api:app --reload
-# running at http://localhost:8000
+cp .env.example .env
 ```
 
-### 3. Run the frontend
+Add your Gemini API key (recommended) or OpenAI API key:
 
-The frontend is plain HTML — no build step needed. Open `docs/index.html` directly in a browser, or serve it with any static server:
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+*(Note: The server runs seamlessly even without an API key by using the built-in local cheese database engine.)*
+
+### 4. Start the application
 
 ```bash
-cd docs
-python -m http.server 5500
-# open http://localhost:5500
+npm start
 ```
 
-### 4. Ingest cheese data (one-time)
-
-If you're starting fresh or want to reload the vector database:
-
-```bash
-cd cheese-backend
-python ingest.py --file dataset/cheeses.csv
-python ingest.py --file dataset/cheese_details.csv
-```
+Visit **`http://localhost:3000`** in your browser.
 
 ---
 
-## Environment variables
+## Cloud Deployment
 
-Copy `.env.example` to `.env` and fill in:
+### Option 1: Google Cloud Run (Recommended)
+Deploy directly to Cloud Run using the Google Cloud CLI:
+
+```bash
+gcloud run deploy cheese-master \
+  --source . \
+  --port 3000 \
+  --allow-unauthenticated \
+  --set-env-vars GEMINI_API_KEY="your_api_key"
+```
+
+### Option 2: Render
+1. Create a new **Web Service** on [Render](https://render.com) and connect your GitHub repository.
+2. Configure settings:
+   - **Environment**: `Node`
+   - **Build Command**: `npm install`
+   - **Start Command**: `npm start`
+3. In **Environment Variables**, add `GEMINI_API_KEY` (or `OPENAI_API_KEY`).
+4. Click **Deploy Web Service**.
+
+### Option 3: Railway / Fly.io
+1. Connect your GitHub repository to [Railway](https://railway.app) or [Fly.io](https://fly.io).
+2. The Node.js `package.json` `start` script (`node server.js`) is automatically detected.
+3. Add `GEMINI_API_KEY` in your service variables and launch.
+
+---
+
+## Environment Variables
 
 | Variable | Required | Description |
 |---|---|---|
-| `OPENAI_API_KEY` | Yes | Your OpenAI API key |
-| `ASTRA_DB_APPLICATION_TOKEN` | Yes | AstraDB application token |
-| `ASTRA_DB_API_ENDPOINT` | Yes | AstraDB API endpoint URL |
-| `ASTRA_DB_KEYSPACE` | No | Defaults to `cheese_db` |
-| `ASTRA_DB_COLLECTION` | No | Defaults to `cheeses` |
-| `OPENAI_MODEL` | No | Defaults to `gpt-4o-mini` |
-| `EMBEDDING_MODEL` | No | Defaults to `text-embedding-3-small` |
-| `ALLOWED_ORIGINS` | No | Comma-separated CORS origins. Set to your GitHub Pages URL in production. |
+| `GEMINI_API_KEY` | Optional | Google Gemini API key for intelligent responses |
+| `OPENAI_API_KEY` | Optional | OpenAI API key (alternative model provider) |
+| `OPENAI_MODEL` | Optional | OpenAI model name (defaults to `gpt-4o-mini`) |
+| `PORT` | Optional | Server port (defaults to `3000`) |
 
 ---
 
-## Deployment
+## License & Credits
 
-### Backend — Render
-
-1. Create a new **Web Service** on [render.com](https://render.com) and connect this repo
-2. Set **Root Directory** to `cheese-backend`
-3. **Build command:** `pip install -r requirements.txt`
-4. **Start command:** `uvicorn api:app --host 0.0.0.0 --port $PORT`
-5. Add environment variables in the Render dashboard (same as above)
-6. Add `ALLOWED_ORIGINS=https://YOUR-USERNAME.github.io` to lock down CORS
-7. Your backend URL will be `https://your-service-name.onrender.com`
-
-> The free Render tier sleeps after 15 minutes of inactivity. Use [cron-job.org](https://cron-job.org) (free) to ping `/health` every 14 minutes to keep it awake.
-
-### Frontend — GitHub Pages
-
-1. In `docs/index.html`, update the production API URL:
-   ```js
-   : "https://your-render-service.onrender.com/chat";
-   ```
-2. Push to `main`
-3. In your GitHub repo: **Settings → Pages → Source → GitHub Actions**
-4. The workflow in `.github/workflows/deploy-frontend.yml` deploys automatically on every push to `main` that touches `docs/`
-
----
-
-## Security notes
-
-- `.env` is gitignored — never commit real credentials
-- CORS is locked to specific origins via the `ALLOWED_ORIGINS` env var
-- The `/chat` endpoint only accepts `POST` requests with a JSON body
-- No user data is stored — each request is stateless
-
----
-
-## Credits
-
-Built with OpenAI, AstraDB (DataStax), FastAPI, and a deep love of cheese.
+Crafted with care for cheese lovers everywhere. Features curated cheese profiles and interactive web experiences.
