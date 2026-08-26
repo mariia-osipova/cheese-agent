@@ -529,11 +529,8 @@
 
   <script type="module" src="js/index.js"></script>
   <script>
-    // Local dev → localhost:8000. Deployed → replace with your Render URL.
-    const _h = window.location.hostname;
-    const API_URL = (_h === 'localhost' || _h === '127.0.0.1' || _h === '' || window.location.protocol === 'file:')
-      ? "http://localhost:8000/chat"
-      : "https://YOUR-RENDER-APP-NAME.onrender.com/chat";
+    // Relative path works across localhost, preview domains, and production
+    const API_URL = "/chat";
 
     // ── Widget open / close ──────────────────────────────────────────────
     const widgetWrapper = document.getElementById('widget-wrapper');

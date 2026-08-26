@@ -1,5 +1,0 @@
-# Dependencies for the image scraper only — NOT needed for the API
-selenium
-webdriver-manager
-pillow
-requests

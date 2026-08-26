@@ -1,10 +1,19 @@
 {
-  "name": "myweb",
+  "name": "cheese-master",
   "version": "1.0.0",
-  "description": "",
-  "main": "docs/js/index.js",
+  "description": "Cheese Master web application",
+  "type": "module",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "node server.js",
+    "start": "node server.js",
+    "build": "node -e \"console.log('Build complete')\""
   },
-  "private": true
+  "private": true,
+  "dependencies": {
+    "@google/genai": "^2.19.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  }
 }

@@ -1,0 +1,10 @@
+{
+  "name": "Cheese Master",
+  "description": "An interactive cheese master assistant with cheese trivia, pairings, selfie filters, and cheese knowledge base.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
