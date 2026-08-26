@@ -1,4 +1,4 @@
-# Cheese Agent
+# 🤖🧀 Cheese Agent 
 
 An AI-powered cheese chatbot with slash commands, a trivia quiz, a cheese selfie camera, and a cheddar takeover mode. Built with an Express.js backend (with Gemini & OpenAI support, plus local knowledge base fallback) and a responsive vanilla JS frontend.
 
